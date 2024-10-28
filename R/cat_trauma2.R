@@ -1,6 +1,5 @@
 
 
-
 #' Categorize trauma data
 #'
 #' This function adds Abbreviated Injury Scores (AIS), Injury Severity Scores (ISS), and other descriptors of injury to a dataframe.
@@ -63,11 +62,12 @@
 #' @importFrom stats na.omit
 #' @export
 
-cat_trauma <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
+cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
 
   #Version 241027
 
-  require(dplyr,readr)
+  require(dplyr)
+  require(readr)
   starttime=Sys.time()
 
   # Verify input
