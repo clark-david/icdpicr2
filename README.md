@@ -14,11 +14,6 @@ Package “icdpicr2” consists primarily of the function cat_trauma2. This func
 
 Other functions in the package derive an “International Classification of Diseases-related Injury Severity Score” (ICISS) and a categorization by injury type and location presented as a “framework” by the US CDC.  Further information is provided in the Implementation Details and the help files for each function.
 
-If the so-called “vignette” with the implementation details did not download with the installation of ICDPICR2 from GitHub, perform the installation again with the commands
-	>devtools::install_github(“clark-david/icdpicr2”, build_vignettes=TRUE)
-	>require(icdpicr2)
-	>help(package=”icdpicr2”)
-
 (Version 241026)
 
 
