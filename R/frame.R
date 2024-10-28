@@ -1,6 +1,6 @@
 
 
-#' Categorize !CD-10 injury diagnosis codes similar to the "Barell Matrix" used for ICD-9
+#' Categorize ICD-10 injury diagnosis codes similar to the "Barell Matrix" used for ICD-9
 #'
 #'
 #' This function categorizes ICD-10 diagnosis codes according to the table given in
@@ -17,7 +17,7 @@
 #'
 #' @param dx_pre Prefix for diagnosis code column names (example: dx1, dx2, etc.)
 #'
-#' @param messages Should the program calculate a severity score? Must be TRUE or FALSE (default).
+#' @param severity Should the program calculate a severity score? Must be TRUE or FALSE (default).
 #'          \itemize{
 #'          \item TRUE - Program will calculate the estimated survival for each diagnosis and the minimum overall.
 #'          \item FALSE - No severity scores will be calculated.
@@ -55,7 +55,7 @@
 
 frame <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
 
-  #Version 241025
+  #Version 241028
 
   require(dplyr)
   require(readr)
