@@ -2,7 +2,7 @@
 % Please edit documentation in R/frame.R
 \name{frame}
 \alias{frame}
-\title{Categorize !CD-10 injury diagnosis codes similar to the "Barell Matrix" used for ICD-9}
+\title{Categorize ICD-10 injury diagnosis codes similar to the "Barell Matrix" used for ICD-9}
 \usage{
 frame(df, dx_pre, severity = FALSE, messages = FALSE)
 }
@@ -11,6 +11,12 @@ frame(df, dx_pre, severity = FALSE, messages = FALSE)
 Diagnosis codes should be character strings and may have a decimal or not.}
 
 \item{dx_pre}{Prefix for diagnosis code column names (example: dx1, dx2, etc.)}
+
+\item{severity}{Should the program calculate a severity score? Must be TRUE or FALSE (default).
+\itemize{
+\item TRUE - Program will calculate the estimated survival for each diagnosis and the minimum overall.
+\item FALSE - No severity scores will be calculated.
+}}
 
 \item{messages}{Should the program report completion of each step? Must be TRUE or FALSE (default).
 \itemize{
