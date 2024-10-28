@@ -1,5 +1,6 @@
 
 
+
 #' Categorize trauma data
 #'
 #' This function adds Abbreviated Injury Scores (AIS), Injury Severity Scores (ISS), and other descriptors of injury to a dataframe.
@@ -26,11 +27,10 @@
 #'
 #' @param messages Should the program report completion of each step? Must be TRUE or FALSE (default).
 #'          \itemize{
-#'          \item TRUE - Messages will report completion of each step (may be helpful for large data sets).  
-#'          \item FALSE - Messages will not be reported.  
+#'          \item TRUE - Messages will report completion of each step (may be helpful for large data sets).
+#'          \item FALSE - Messages will not be reported.
 #'          }
 #'
-#' @param verbose Should other updates be printed to the console? TRUE or FALSE (default). This can be helpful for long running computations.
 #'
 #' @return A dataframe identical to the dataframe passed to the function with the following additional variables
 #'          added:
@@ -45,33 +45,17 @@
 #'          \item mechmaj1-mechmaj4: CDC external cause of injury major mechanism for each E-Code captured
 #'          \item intent1-intent4: intent for each E-Code captured
 #'          \item lowmech: lowest CDC external cause of injury major mechanism for all E-Codes captured
-#'          \item PmortTQIP: The TQIP model predicted probability of mortality 
-#'          \item PmortNIS: The NIS model predicted probability of mortality 
+#'          \item PmortTQIP: The TQIP model predicted probability of mortality
+#'          \item PmortNIS: The NIS model predicted probability of mortality
 #'          }
 #'
-#' @details  Data should be in wide format:
-#' 
-#'      ident   dx1       dx2       dx3      etc. 
-#'      31416   S32110A   S3251     NA         
-#'      31417   S72141A   T07XXXA   D62    
-#' 
-#'
-#' Codes for AIS severity:
-#' \itemize{
-#'       \item 1 = Minor
-#'       \item 2 = Moderate
-#'       \item 3 = Serious
-#'       \item 4 = Severe
-#'       \item 5 = Critical
-#'       \item 6 = Unsurvivable
-#'       \item 9 = Unknown
-#'}
+#' @details  Data should be in wide format, as in the example below:
 #'
 #' @examples
 #' df_in <- read.table(header = TRUE, text = "
 #'     ident   dx1       dx2       dx3
 #'     31416   S32110A   S3251     NA
-#'     31417   S72141A   T07XXXA   D62 
+#'     31417   S72141A   T07XXXA   D62
 #' ")
 #' df_out <- cat_trauma2(df_in, "dx", TRUE, FALSE)
 #'
@@ -79,12 +63,14 @@
 #' @importFrom stats na.omit
 #' @export
 
-cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE, verbose = FALSE) {
-  
-  require(tidyverse)  
+cat_trauma <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
+
+  #Version 241027
+
+  require(dplyr,readr)
   starttime=Sys.time()
-  
-  # Verify input 
+
+  # Verify input
   if(!is.data.frame(df)) stop("First argument must be a dataframe")
   if(NROW(df) == 0) stop("Data file contains no observations. It must contain at least one row")
   if(!is.character(dx_pre)) stop("Second argument must be a character string")
@@ -98,58 +84,58 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE, verbose = FAL
   dx_nums <- as.numeric(sub(regex_dx, "\\1", dx_colnames))
   num_dx <- length(dx_nums)
   if(num_dx == 0) stop("No variables with prefix found in data")
-  
+
   # Make sure df is not a tibble and if it is convert back to regular dataframe
   df <- data.frame(df)
-  
+
   ntab <- i10_map_sev
   ntab <- ntab[ , c("dx","severity","issbr")]
   etab <- i10_map_mech
-  
+
   #---------------------------------------------------------------------------------#
   #  Merge diagnosis code variables with N-Code reference table to obtain severity  #
   #  and ISS body region variables for each diagnosis code and add them to the data #
   #---------------------------------------------------------------------------------#
   for(i in dx_nums){
-    
+
     if(messages==TRUE){
       message("Determining severity of Diagnosis ", i, " of ", num_dx)
     }
-    
+
     # Create column name
     dx_name <- paste0(dx_pre, i)
-    
+
     # Pull just the diagnosis code column of interest
     df_ss <- df[ , dx_name, drop = FALSE]
-    
+
     # Add row variable for sorting back to original order
     df_ss$n <- 1:NROW(df_ss)
-    
+
     # Strip out decimal in all codes
     df_ss[ , dx_name] <- sub("\\.", "", df_ss[ , dx_name])
-    
+
     # Get rid of codes that do not start with a valid character
     i10_valid <- c("S","T")
     df_ss[ , dx_name] <- ifelse(substr(df_ss[,dx_name], 1, 1) %in% c(i10_valid), df_ss[,dx_name], NA)
-    
-    # Merge with lookup table for severity  
+
+    # Merge with lookup table for severity
     temp <- merge(df_ss, ntab, by.x = dx_name, by.y = "dx", all.x = TRUE, all.y = FALSE, sort = FALSE)
-    
+
     # Reorder rows after merge
     temp <- temp[order(temp$n), ]
-    
+
     # Reorder columns and drop dx and n
     temp <- temp[ , c("severity","issbr")]
-    
+
     # Rename columns
     names(temp) <- paste0(c("sev_","issbr_"), i)
-    
+
     # Add temp columns to dataframe
     df <- .insert_columns(df, dx_name, temp)
-    
+
   }   #END FOR LOOP (i in dxno)
-  
-  
+
+
   #----------------------------------------------------#
   # Create variables for maximum AIS/ISS body region.  #
   #----------------------------------------------------#
@@ -162,20 +148,20 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE, verbose = FAL
   body_regions <- unique(i10_map_sev$issbr)
   # Make usable for column names
   issbr_names <- gsub("/", "_", body_regions)
-  
+
   # For each of the 6 body regions loop through dx codes and get max ais for that body region
   for(i in body_regions){
-    
+
     # Get severity columns and multiply by 1 if they are for body region i and 0 otherwise
     # This uses element-wise multiplication of matrices
     # All severity columns as a matrix * Indicator matrix of body region columns (entries 1 or 0)
     temp <- df[ , grepl("sev_", names(df)), drop = FALSE] * (1*(df[ , grepl("issbr_", names(df))] == i))
-    
+
     # Take max (excluding 9) and assign to mxaisbr_i
     # Severity score of 9 implies unknown severity
     # Thus we want to exclude these as long as there is at least one known severity for the body region
     # However if all severity scores for the body region are 9 then we will assign maxaisbr a value of 9
-    # by defining a function that converts all zeros to NA, 
+    # by defining a function that converts all zeros to NA,
     # where zeros represent severity values not associated with body region i
     df[ , paste0("mxaisbr_", gsub("/","",i))] <- apply(temp, 1, function(row){
       row <- ifelse(row == 0, NA, row)
@@ -189,15 +175,15 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE, verbose = FAL
       return(maxaisbr)
     })
   } #END FOR i in body_regions
-  
-  
+
+
   #----------------------------------------------------------------------#
   #  Calculate maximum severity over all ISS body regions, excluding 9s  #
   #----------------------------------------------------------------------#
-  
+
   # Define function to convert 9 to 0
   c9to0 <- function(x) ifelse(x == 9, 0, x)
-  
+
   # Assign maxais
   # This is a bit complicated
   #   if all maxbr_i are in (9,0,NA) then the max should be 9
@@ -217,15 +203,15 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE, verbose = FAL
     return(maxais)
   })
   df$maxais <- as.numeric(df$maxais)
-  
-  
+
+
   #------------------------#
   #  Calculate ISS value.  #
   #------------------------#
   if(messages==TRUE){
     message("Calculating Injury Severity Score ")
-  }  
-  
+  }
+
   # ISS is calculated as the sum of the squared three highest maxaisbr varaiables for a given person.
   # We need to exclude 9s in this calculation.
   df$riss <- apply(df, 1, function(row){
@@ -237,16 +223,16 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE, verbose = FAL
     # Take the three highest, square them, and sum the result
     sum(temp[order(-temp)[1:3]]^2)
   })
-  
+
   # Replace ISS value with 75 if maximum severity is 6. This implies that the person is dead.
   # 75 is the max ISS score 3(5^2) = 75
   df[df$maxais == 6,"riss"] <- 75
-  
+
   # Replace ISS value with NA if maximum severity is 9.
   # If maxais is 9, this implies that there were only injuries of unknown severity
   df[df$maxais == 9, "riss"] <- NA
-  
-  
+
+
   #------------------------------------------------#
   # Calculate the New Injury Severity Score (NISS) #
   #------------------------------------------------#
@@ -264,19 +250,19 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE, verbose = FAL
     # Take the three highest, square them, and sum the result
     sum(temp[order(-temp)[1:3]]^2)
   })
-  
+
   # Replace NISS value with 75 if maximum severity is 6. This implies that the person is dead.
   # 75 is the max NISS score 3(5^2) = 75
   df[df$maxais == 6,"niss"] <- 75
-  
+
   # Replace NISS value with NA if maximum severity is 9.
   # If maxais is 9 this implies that there were only injuries of unknown severity
   df[df$maxais == 9, "niss"] <- NA
-  
-  
-  
+
+
+
   if(mech==TRUE) {
-    
+
     #-----------------------------------------------------------------------#
     #  Merge diagnosis codes with mechanism code reference table to obtain  #
     #  major mechanism, minor mechanism and intent variables for up to 4    #
@@ -284,24 +270,24 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE, verbose = FAL
     #  In ICD-9, mechanism codes started with the letter E,                 #
     #  and they are still often called E-codes                                   #
     #-----------------------------------------------------------------------#
-    
+
     if(messages==TRUE){
       mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
       message("Time elapsed ", mindiff, " minutes")
       message("Compiling mechanism codes -- the most time-consuming step")
-    } 
+    }
     # Get ecode column names
     ecode_colnames <- paste0("ecode_", 1:4)
-    
+
     # Create ecode columns
     df[ , ecode_colnames] <- NA
-    
+
     # For each row extract the first 4 mechanism codes and add them to the "e-code" columns
     # ICD10 mechanism codes do not start with E.
-    
-    # Get a list of all mechanism codes 
+
+    # Get a list of all mechanism codes
     ecode_regex <- paste0("^", etab$dx, collapse = "|")
-    
+
     df[ , ecode_colnames] <- t(apply(df, 1, function(row){
       # remove decimal
       row <- sub("\\.", "", row)
@@ -312,55 +298,55 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE, verbose = FAL
       # save first 4 Ecodes
       row_ecodes[1:4]
     }))
-    
-    
+
+
     # Loop through mechanism codes and add associated variables from table
     for(i in 1:4){
       if(messages==TRUE){
         message("Determining mechanism for Diagnosis ", i, " of 4")
       }
       col_name <- paste("ecode_", i, sep="")
-      
+
       # Subset dataframe: pull just the diagnosis code column of interest
       df_ss <- df[,col_name, drop = FALSE]
-      
+
       # Add row variable for sorting back to original order
       df_ss$n <- 1:NROW(df_ss)
-      
+
       # Strip out decimal
       df_ss[,col_name] <- sub("\\.","", df_ss[,col_name])
-      
+
       # Merge in ecode variables
       temp <- merge(df_ss, etab, by.x=col_name, by.y="dx", all.x = TRUE, all.y = FALSE, sort = FALSE)
-      
+
       # Reorder rows after merge
       temp <- temp[order(temp$n), ]
-      
+
       # Drop dx and n
       temp <- temp[,c("mechmaj", "mechmin", "intent")]
-      
+
       # Rename columns
       names(temp) <- paste(c("mechmaj", "mechmin", "intent"), i, sep="")
-      
+
       # Add columns to dataframe
       df <- .insert_columns(df, col_name, temp)
-      
+
     }  #END for loop
-    
+
   }  #END if mech==TRUE
-  
+
   if(messages==TRUE){
     mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
     message("Time elapsed ", mindiff, " minutes")
     message("Calculating predicted mortality from TQIP regression model")
   }
-  
-  
+
+
   #---------------------------------------------------------------------#
   # Add mortality prediction for ICD-10-cm codes from regression models #
   #---------------------------------------------------------------------#
-  
-  coef_df <- select(i10_map_sev,dx,TQIPeffect,TQIPint)  
+
+  coef_df <- select(i10_map_sev,dx,TQIPeffect,TQIPint)
   intercept <- max(coef_df$TQIPint,na.rm=TRUE)
   # Create hash table
   coef_df <- coef_df[!is.na(coef_df$TQIPeffect), ]
@@ -373,14 +359,14 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE, verbose = FAL
   }
   mat <- as.matrix(df[,grepl(paste0("^", dx_pre), names(df))])
   df$PmortTQIP <- apply(mat, 1, calc_mortality_prediction)
-  
+
   if(messages==TRUE){
     mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
     message("Time elapsed ", mindiff, " minutes")
     message("Calculating predicted mortality from NIS regression model")
   }
-  
-  coef_df <- select(i10_map_sev,dx,NISeffect,NISint)  
+
+  coef_df <- select(i10_map_sev,dx,NISeffect,NISint)
   intercept <- max(coef_df$NISint,na.rm=TRUE)
   # Create hash table
   coef_df <- coef_df[!is.na(coef_df$NISeffect), ]
@@ -393,19 +379,19 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE, verbose = FAL
   }
   mat <- as.matrix(df[,grepl(paste0("^", dx_pre), names(df))])
   df$PmortNIS <- apply(mat, 1, calc_mortality_prediction)
-  
+
   if(messages==TRUE){
     mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
     message("Time elapsed ", mindiff, " minutes")
   }
-  
-  
+
+
   # Set rownames
   rownames(df) <- 1:nrow(df)
-  
+
   # Return dataframe
   df
-  
-} #END 
+
+} #END
 
 
