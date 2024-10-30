@@ -4,10 +4,10 @@ Title: Categorize ICD-10 Injury Codes
 Version: 1.0.0
 Author: David Clark, Adam Black
 Maintainer: David Clark <david.clark@tufts.edu>
-Description: Contains function cat_trauma2
-    Reads specified data containing one or more ICD-10 codes per subject
-    Identifies injury codes, calculates measures of injury severity and mechanisms
-    Returns original data with severity scores and mechanism categories
+Description: Reads dataframe containing one or more ICD-10 codes per subject
+    Returns original data with injury categorizations and severity scores
+    See "Implementation Details" vignette; if this is not with help files,
+       reinstall with install_github("clark-david/icdpicr2",build_vignettes=TRUE)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
