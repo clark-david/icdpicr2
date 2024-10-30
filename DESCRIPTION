@@ -1,7 +1,7 @@
 Package: icdpicr2
 Type: Package
 Title: Categorize ICD-10 Injury Codes
-Version: 0.1.0
+Version: 1.0.0
 Author: David Clark, Adam Black
 Maintainer: David Clark <david.clark@tufts.edu>
 Description: Contains function cat_trauma2
