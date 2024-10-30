@@ -338,7 +338,7 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
   if(messages==TRUE){
     mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
     message("Time elapsed ", mindiff, " minutes")
-    message("Calculating predicted mortality from TQIP regression model")
+    message("Calculating predicted mortality from TQP regression model")
   }
 
 
