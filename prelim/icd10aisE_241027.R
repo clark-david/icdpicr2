@@ -8,7 +8,7 @@
 #               UPDATE EXTERNAL CAUSE CATEGORIES
 #               DERIVE "BARELL MATRIX" CATEGORIES
 #
-#      David Clark, 2022-2023
+#      David Clark, 2022-2024
 #                     
 ##########################################################################
 
@@ -313,4 +313,25 @@ d4<-score(d3,weights="quan",assign0=FALSE)
 d5<-bind_cols(d1,d4)
 d5<-rename(d5,score=...50)
 
+
+########## ADDED 2024 ###############################################
+
+#  MAKE LOOKUP TABLES FOR ICDPICR2
+
+i10_map_sev<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICD_AIS_241023.csv")
+i10_map_sev<-rename(i10_map_sev,dx=ICD,issbr=BR,severity=AIS)
+write_csv(i10_map_sev,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_sev_241023.csv")
+
+etab<-read_csv("/Users/davideugeneclark/Documents/icdpicr/ICD_Mech.csv")
+etab<-rename(etab,dx=ICD10,mechmaj=MECHANISM,intent=INTENT)
+etab<-mutate(etab,mechmin="")
+i10_map_mech<-distinct(etab)
+i10_map_mech<-mutate(i10_map_mech,version="v241027")
+write_csv(i10_map_mech,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_mech_241027.csv")
+
+i10_map_frame<-read_csv("/Users/davideugeneclark/Documents/icdpicr/ICD_Cells.csv")
+i10_map_frame<-rename(i10_map_frame,dx=ICD)
+i10_map_frame<-mutate(i10_map_frame,PsCell=1-PmCell)
+i10_map_frame<-mutate(i10_map_frame,version="v241027")
+write_csv(i10_map_frame,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_frame_241027.csv")
 

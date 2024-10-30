@@ -11,7 +11,7 @@
 #               ALLOW FOR TRUNCATED ICD CODES, INCLUDING BASIC ICD-10
 #               PRODUCE FINAL TABLE FOR CALCULATING ISS
 #
-#      David Clark, 2022-2023
+#      David Clark, 2022-2024
 #                     
 ##########################################################################
 
@@ -561,34 +561,90 @@ d123<-filter(d5,seq==1,Burngroup=="X")
 d123<-select(d123,digits123,AIS3,BR3)
 d123<-rename(d123,ICD=digits123,AIS=AIS3,BR=BR3)
 
-#Add valid ICD10 (international) codes not obtainable by truncation
-d123x<-read_csv("icd10add.csv")
-d123x<-rename(d123x,ICD=icd10)
-d123x<-mutate(d123x,AIS=9)
-d123x<-mutate(d123x,BR="X")
 
-d123y<-bind_rows(d123,d123x)
-d123y<-mutate(d123y,digits123=str_sub(ICD,1,3))
-d123y<-group_by(d123y,digits123)
-d123y<-mutate(d123y,AIS=min(AIS))
-d123y<-mutate(d123y,BR=min(BR))
-d123y<-ungroup(d123y)
+
+####################### FOLLOWING CODE MODIFIED OCTOBER 2024 ###############################
+
+write_csv(d123,"ICDAIS_2A.csv")
+
+d123 <- read_csv("ICDAIS_2A.csv")
 
 d1renamed<-rename(d1,BR=BR1,AIS=AIS2)
-d6<-bind_rows(d123y,d1234,d12345,d123456,d1renamed)
+d6<-bind_rows(d123,d1234,d12345,d123456,d1renamed)
 d6<-mutate(d6,AIS=if_else(AIS==0,1,AIS))
 d6<-arrange(d6,ICD)
 d6<-select(d6,ICD,AIS,BR,TQIPeffect,TQIPint,NISeffect,NISint)
 
-write_csv(d6,"ICDAIS_3.csv")
+write_csv(d6,"ICDAIS_4.csv")
 
-#Unduplicate
-d7<-read_csv("ICDAIS_3.csv")
+
+#Get list of valid ICD10 (international) codes not obtainable by truncation
+#Table modified from Gedeborg et al., Journal of Trauma 2014
+#  Excludes diagnoses outside National Trauma Data Standard (see icd10aisA)
+#  Adds a few codes (S137,S577,S732,S737,S738) 
+#  Indicates codes already in ICDAIS_4.csv
+#  Assigns body region
+
+dged <- read_csv("/Users/davideugeneclark/Documents/icdpicr2/gedeborg_modified.csv")
+dged <- rename(dged,ICD=icd10)
+dged <- rename(dged,BR=br)
+dged <- mutate(dged,mort=(totaln-survivors)/totaln)
+
+#Assign AIS, somewhat arbitrarily, based on diagnosis-specific mortality 
+#  and compare to ais from truncation already in ICDAIS_4.csv
+
+dged <- mutate(dged,AIS=case_when(
+   mort>=0 & mort<.01 ~ 1,
+   mort>=.01 & mort<.02 ~ 2,
+   mort>=.02 & mort<.1 ~ 3,
+   mort>=.1 & mort<.2 ~ 4,
+   mort>=.2 & mort<=1 ~ 5,
+   TRUE ~ 1
+   ) )
+tabyl(dged,AIS,ais)
+tabyl(dged,AIS,added)
+
+dged <- select(dged,ICD,AIS,BR,already_in,totaln,dsp)
+
+#Add remaining diagnoses to ICDAIS_4.csv
+d6 <- read_csv("/Users/davideugeneclark/Documents/icdpicr/ICDAIS_4.csv")
+d6 <- bind_rows(d6,dged)
+write_csv(d6,"/Users/davideugeneclark/Documents/icdpicr2/ICDAIS_5.csv")
+
+
+#Unduplicate to create ICD_AIS.csv
+#Sort in such a way that information is used from Gedeborg if available
+d7<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICDAIS_5.csv")
+d7<-arrange(d7,ICD,already_in)
 d7<-group_by(d7,ICD)
 d7<-mutate(d7,seq=row_number())
 d7<-ungroup(d7)
 d7<-filter(d7,seq==1)
-d7<-select(d7,-seq)
-write_csv(d7,"ICD_AIS.csv")
+d7<-mutate(d7,version="v241023")
+d7<-select(d7,-seq,-already_in,-totaln,-dsp)
+write_csv(d7,"/Users/davideugeneclark/Documents/icdpicr2/ICD_AIS_241023.csv")
+
+#Unduplicate to create i10_map_iciss.csv
+d8<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICDAIS_5.csv")
+d8<-arrange(d8,ICD,already_in)
+d8<-group_by(d8,ICD)
+d8<-select(d8,-TQIPeffect,-TQIPint,-NISeffect,-NISint)
+d8<-mutate(d8,seq=row_number())
+d8<-ungroup(d8)
+d8<-filter(d8,seq==1)
+d8<-mutate(d8,base=str_sub(ICD,1,4))
+d8<-group_by(d8,base)
+d8<-mutate(d8,totaln=max(totaln,na.rm=TRUE))
+d8<-mutate(d8,dsp=max(dsp,na.rm=TRUE))
+d8<-ungroup(d8)
+d8<-mutate(d8,totaln=if_else((totaln<0),NA,totaln))
+d8<-mutate(d8,dsp=if_else((dsp<0|dsp>1),NA,dsp))
+d8<-mutate(d8,dsp_cons=if_else(totaln<5,1,dsp))
+d8<-select(d8,ICD,totaln,dsp,dsp_cons)
+d8<-rename(d8,dsp_noncons=dsp)
+d8<-rename(d8,dx=ICD)
+d8<-mutate(d8,version="v241025")
+write_csv(d8,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_iciss_241025.csv")
 
 
+        

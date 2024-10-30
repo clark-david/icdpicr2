@@ -19,7 +19,7 @@ library(icdpicr2)
 ```
 
 
-*Version 241030*
+*Version 241031*
 
 ### Background
 
@@ -128,7 +128,7 @@ Reads in user data in the specified format.  Assigns ICD-10 injury codes to a ce
 
 11. Annest JL, Hedegaard H, Chen L, Warner M, Smalls E. Proposed framework for presenting injury data using ICD-10-CM external cause of injury codes. 2014. https://www.cdc.gov/injury/wisqars/pdf/ICD-10-CM_External_Cause_Injury_Codes-a.pdf.
 
-12. Berecki_Gisolf J, Rezaei-Darzi E, Fernando DT, D’Elia A.  International Classification of Disease based Injury Severity Score (ICISS): a comparison of methodologies applied to linked data from New South Wales, Australia.  Ink Prev 2024; 0:1-8 ePub ahead of print.
+12. Berecki_Gisolf J, Rezaei-Darzi E, Fernando DT, D’Elia A.  International Classification of Disease based Injury Severity Score (ICISS): a comparison of methodologies applied to linked data from New South Wales, Australia.  Inj Prev 2024; 0:1-8 ePub ahead of print.
 
 13. Hedegaard H, Johnson RL, Garnett MF, Thomas KE.  The 2020 International Classification of Diseases, 10th Revision, Clinical Modification injury diagnosis framework for categorizing injuries by body region and nature of injury.  Nat Health Stat Reports 2020; 150:1-26.
 
@@ -148,3 +148,4 @@ Reads in user data in the specified format.  Assigns ICD-10 injury codes to a ce
 * Functions available in icdpicr2
 
 * References
+

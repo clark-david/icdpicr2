@@ -1,7 +1,7 @@
 Package: icdpicr2
 Type: Package
 Title: Categorize ICD-10 Injury Codes
-Version: 1.0.0
+Version: 2.0.0
 Author: David Clark, Adam Black
 Maintainer: David Clark <david.clark@tufts.edu>
 Description: Reads dataframe containing one or more ICD-10 codes per subject
