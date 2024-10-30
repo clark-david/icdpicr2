@@ -44,7 +44,7 @@
 #'          \item mechmaj1-mechmaj4: CDC external cause of injury major mechanism for each E-Code captured
 #'          \item intent1-intent4: intent for each E-Code captured
 #'          \item lowmech: lowest CDC external cause of injury major mechanism for all E-Codes captured
-#'          \item PmortTQIP: The TQIP model predicted probability of mortality
+#'          \item PmortTQP: The TQP model predicted probability of mortality
 #'          \item PmortNIS: The NIS model predicted probability of mortality
 #'          }
 #'
@@ -64,7 +64,7 @@
 
 cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
 
-  #Version 241027
+  #Version 241030
 
   require(dplyr)
   require(readr)
@@ -358,7 +358,7 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
     1/(1+exp(-x))
   }
   mat <- as.matrix(df[,grepl(paste0("^", dx_pre), names(df))])
-  df$PmortTQIP <- apply(mat, 1, calc_mortality_prediction)
+  df$PmortTQP <- apply(mat, 1, calc_mortality_prediction)
 
   if(messages==TRUE){
     mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)

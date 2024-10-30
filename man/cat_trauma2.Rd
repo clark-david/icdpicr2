@@ -38,7 +38,7 @@ A dataframe identical to the dataframe passed to the function with the following
          \item mechmaj1-mechmaj4: CDC external cause of injury major mechanism for each E-Code captured
          \item intent1-intent4: intent for each E-Code captured
          \item lowmech: lowest CDC external cause of injury major mechanism for all E-Codes captured
-         \item PmortTQIP: The TQIP model predicted probability of mortality
+         \item PmortTQP: The TQP model predicted probability of mortality
          \item PmortNIS: The NIS model predicted probability of mortality
          }
 }
