@@ -7,7 +7,6 @@
 #'          Hedegaard H, Johnson RL, Garnett MF, Thomas KE. The 2020 International Classification of Diseases,
 #'          10th Revision, Clinical Modification injury diagnosis framework for categorizing injuries by
 #'          body region and nature of injury. Nat Health Stat Reports 2020;150:1-26.
-#'
 #'    and (if option selected) predicts mortality for each subject as described in
 #'          Clark DE, Ahmad S. Estimating injury severity using the Barell matrix. Inj Prev 2006;12:111-116.
 #'
