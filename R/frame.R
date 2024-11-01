@@ -1,5 +1,6 @@
 
 
+
 #' Categorize ICD-10 injury diagnosis codes similar to the "Barell Matrix" used for ICD-9
 #'
 #'
@@ -10,6 +11,13 @@
 #'    and (if option selected) predicts mortality for each subject as described in
 #'          Clark DE, Ahmad S. Estimating injury severity using the Barell matrix. Inj Prev 2006;12:111-116.
 #'
+#'  =============================================
+#'  REMINDER
+#'  ICDPICR Version 2.0.0 IS BEING TESTED
+#'  Major bugs and flaws may still exist
+#'  Please report issues to david.clark@tufts.edu
+#'  or at github/clark-david/icdpicr2/issues
+#'  =============================================
 #'
 #' @param df A dataframe in wide format containing ICD-10 diagnosis codes with a common column name prefix.
 #'           Diagnosis codes should be character strings and may have a decimal or not.
@@ -54,7 +62,16 @@
 
 frame <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
 
-  #Version 241028
+  #Version 241101
+
+  message("=============================================")
+  message("REMINDER")
+  message("ICDPICR Version 2.0.0 IS BEING TESTED")
+  message("Major bugs and flaws may still exist")
+  message("Please report issues to david.clark@tufts.edu")
+  message("or at github/clark-david/icdpicr2/issues")
+  message("==============================================")
+
 
   require(dplyr)
   require(readr)

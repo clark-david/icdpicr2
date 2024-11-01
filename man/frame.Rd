@@ -42,7 +42,15 @@ This function categorizes ICD-10 diagnosis codes according to the table given in
          Clark DE, Ahmad S. Estimating injury severity using the Barell matrix. Inj Prev 2006;12:111-116.
 }
 \details{
-Data should be in wide format, as in the example below:
+=============================================
+ REMINDER
+ ICDPICR Version 2.0.0 IS BEING TESTED
+ Major bugs and flaws may still exist
+ Please report issues to david.clark@tufts.edu
+ or at github/clark-david/icdpicr2/issues
+ =============================================
+
+ Data should be in wide format, as in the example below:
 }
 \examples{
 df_in <- read.table(header = TRUE, text = "

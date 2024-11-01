@@ -18,8 +18,16 @@ knitr::opts_chunk$set(
 library(icdpicr2)
 ```
 
+*Version 241101*
 
-*Version 241031*
+**===================================**\
+**REMINDER**\
+**ICDPICR Version 2.0.0 IS BEING TESTED**\
+**Major bugs and flaws may still exist**\
+**Please report issues to david.clark@tufts.edu**\
+**or at github/clark-david/icdpicr2/issues**\
+**===================================**\
+
 
 ### Background
 
