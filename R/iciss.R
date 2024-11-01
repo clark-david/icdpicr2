@@ -56,7 +56,7 @@
 
 iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
 
-  #Version 241026
+  #Version 241101
 
   require(dplyr)
   require(readr)
@@ -175,6 +175,15 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
     mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
     message("Time elapsed ", mindiff, " minutes")
   }
+
+  message("=============================================")
+  message("REMINDER")
+  message("ICDPICR Version 2.0.0 IS BEING TESTED")
+  message("Major bugs and flaws may still exist")
+  message("Please report issues to david.clark@tufts.edu")
+  message("or at github/clark-david/icdpicr2/issues")
+  message("==============================================")
+
 
   # Return dataframe
   df

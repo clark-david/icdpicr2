@@ -64,7 +64,7 @@
 
 cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
 
-  #Version 241030
+  #Version 241101
 
   require(dplyr)
   require(readr)
@@ -388,6 +388,15 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
 
   # Set rownames
   rownames(df) <- 1:nrow(df)
+
+  message("=============================================")
+  message("REMINDER")
+  message("ICDPICR Version 2.0.0 IS BEING TESTED")
+  message("Major bugs and flaws may still exist")
+  message("Please report issues to david.clark@tufts.edu")
+  message("or at github/clark-david/icdpicr2/issues")
+  message("==============================================")
+
 
   # Return dataframe
   df
