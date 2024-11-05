@@ -36,7 +36,9 @@ A dataframe identical to the dataframe passed to the function with the following
 }
 \description{
 This function adds Diagnosis-specific Survival Probabilities (DSP) to a dataframe, based on the table
-   provided by Gedeborg and colleagues (J Trauma Acute Care Surgery 2014).
+   provided by Gedeborg and colleagues (J Trauma Acute Care Surgery 2014).  Codes longer than four digits
+   are treated as if they were four-digit ICD-10 codes as published by the World Health Organization.
+   Thus, an ICD-10-CM code like S00552A is considered the same as S005.
 For each observation this function will
 \enumerate{
    \item assign a severity (DSP) to each valid ICD-10 injury diagnosis code,
