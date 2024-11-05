@@ -8,7 +8,7 @@
 #'    \item assign a severity (AIS) and ISS body region values to each valid ICD-10 injury diagnosis code,
 #'    \item add variables for maximum severity of each body region,
 #'    \item calculate ISS, "New ISS", maximum AIS, and regression-based mortality predictions,
-#'    \item select the first 4 mechanism codes and categorize mechanism and intent following CDC guidelines
+#'    \item select the first 4 mechanism (external cause) codes and categorize mechanism and intent following CDC guidelines
 #'}
 #'
 #'
@@ -20,7 +20,7 @@
 #'
 #' @param mech Should the program determine mechanism? Must be TRUE (default) or FALSE.
 #'          \itemize{
-#'          \item TRUE - Mechanism codes will be sought and processed by the program.
+#'          \item TRUE - Injury mechanism (external cause) codes will be sought and processed by the program.
 #'          \item FALSE - This portion of the program will be skipped (to save time).
 #'          }
 #'
@@ -41,9 +41,9 @@
 #'          \item riss: computed injury severity score
 #'          \item niss: new injury severity score
 #'          \item ecode_1-ecode_4: first 4 mechanism codes found in each row of data
-#'          \item mechmaj1-mechmaj4: CDC external cause of injury major mechanism for each E-Code captured
-#'          \item intent1-intent4: intent for each E-Code captured
-#'          \item lowmech: lowest CDC external cause of injury major mechanism for all E-Codes captured
+#'          \item mechmaj1-mechmaj4: CDC external cause of injury major mechanism for each mechanism code captured
+#'          \item intent1-intent4: intent for each mechanism code captured
+#'          \item lowmech: lowest CDC external cause of injury major mechanism for all mechanism codes captured
 #'          \item PmortTQP: The TQP model predicted probability of mortality
 #'          \item PmortNIS: The NIS model predicted probability of mortality
 #'          }
@@ -64,7 +64,7 @@
 
 cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
 
-  #Version 241101
+  #Version 241105
 
   require(dplyr)
   require(readr)
