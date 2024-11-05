@@ -1,5 +1,5 @@
 ---
-title: "Implementation Details"
+title: "implementation"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{implementation}
@@ -17,8 +17,7 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(icdpicr2)
 ```
-
-*Version 241101*
+*Version 241105*
 
 **===================================**\
 **REMINDER**\
@@ -134,7 +133,7 @@ Reads in user data in the specified format.  Assigns ICD-10 injury codes to a ce
 
 10. Osler T, Baker SP, Long WA. Modification of the injury severity score that both improves accuracy and simplifies scoring. J Trauma 1997; 43:922-925.
 
-11. Annest JL, Hedegaard H, Chen L, Warner M, Smalls E. Proposed framework for presenting injury data using ICD-10-CM external cause of injury codes. 2014. https://www.cdc.gov/injury/wisqars/pdf/ICD-10-CM_External_Cause_Injury_Codes-a.pdf.
+11. Hedegaard H, Johnson RL, Garnett MF, Thomas KE.  The International Classification of Diseases, 10th Revision, Clinical Modification (ICD-10-CM) external cause of injury framework for categorizing mechanism and intent of injury.  Nat Health Stat Reports 2019; 136:1-21.
 
 12. Berecki_Gisolf J, Rezaei-Darzi E, Fernando DT, D’Elia A.  International Classification of Disease based Injury Severity Score (ICISS): a comparison of methodologies applied to linked data from New South Wales, Australia.  Inj Prev 2024; 0:1-8 ePub ahead of print.
 
