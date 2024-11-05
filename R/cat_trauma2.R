@@ -43,7 +43,6 @@
 #'          \item ecode_1-ecode_4: first 4 mechanism codes found in each row of data
 #'          \item mechmaj1-mechmaj4: CDC external cause of injury major mechanism for each mechanism code captured
 #'          \item intent1-intent4: intent for each mechanism code captured
-#'          \item lowmech: lowest CDC external cause of injury major mechanism for all mechanism codes captured
 #'          \item PmortTQP: The TQP model predicted probability of mortality
 #'          \item PmortNIS: The NIS model predicted probability of mortality
 #'          }
