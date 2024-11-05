@@ -1,5 +1,4 @@
 
-
 #' Compute International Classification of Diseases-Based Injury Severity Score (ICISS)
 #'
 #' This function adds Diagnosis-specific Survival Probabilities (DSP) to a dataframe, based on the table
