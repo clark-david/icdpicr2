@@ -63,51 +63,6 @@ d6<-rename(d6,ICD10=ICD10CM)
 d6<-arrange(d6,ICD10)
 write_csv(d6,"mech6.csv")
 
-#Derive mechanism and intent for truncated codes, including basic ICD-10
-d6<-read_csv("mech6.csv")
-d7a<-mutate(d6,digits12345=str_sub(ICD10,1,5))
-d7a<-group_by(d7a,digits12345)
-d7a<-mutate(d7a,MECH5=if_else(max(MECHANISM)==min(MECHANISM),max(MECHANISM),
-                              "Other Specified"))
-d7a<-mutate(d7a,INT5=if_else(max(INTENT)==min(INTENT),max(INTENT),
-                             "Undetermined"))
-d7a<-mutate(d7a,seq=row_number())
-d7a<-ungroup(d7a)
-d7b<-filter(d7a,seq==1)
-d7b<-select(d7b,digits12345,MECH5,INT5)
-d7b<-rename(d7b,ICD10=digits12345,MECHANISM=MECH5,INTENT=INT5)
-write_csv(d7b,"mech5.csv")
-
-d8a<-mutate(d6,digits1234=str_sub(ICD10,1,4))
-d8a<-group_by(d8a,digits1234)
-d8a<-mutate(d8a,MECH4=if_else(max(MECHANISM)==min(MECHANISM),max(MECHANISM),
-                              "Other Specified"))
-d8a<-mutate(d8a,INT4=if_else(max(INTENT)==min(INTENT),max(INTENT),
-                             "Undetermined"))
-d8a<-mutate(d8a,seq=row_number())
-d8a<-ungroup(d8a)
-d8b<-filter(d8a,seq==1)
-d8b<-select(d8b,digits1234,MECH4,INT4)
-d8b<-rename(d8b,ICD10=digits1234,MECHANISM=MECH4,INTENT=INT4)
-write_csv(d8b,"mech4.csv")
-
-d9a<-mutate(d6,digits123=str_sub(ICD10,1,3))
-d9a<-group_by(d9a,digits123)
-d9a<-mutate(d9a,MECH3=if_else(max(MECHANISM)==min(MECHANISM),max(MECHANISM),
-                              "Other Specified"))
-d9a<-mutate(d9a,INT3=if_else(max(INTENT)==min(INTENT),max(INTENT),
-                             "Undetermined"))
-d9a<-mutate(d9a,seq=row_number())
-d9a<-ungroup(d9a)
-d9b<-filter(d9a,seq==1)
-d9b<-select(d9b,digits123,MECH3,INT3)
-d9b<-rename(d9b,ICD10=digits123,MECHANISM=MECH3,INTENT=INT3)
-write_csv(d9b,"mech3.csv")
-
-d10<-bind_rows(d6,d7b,d8b,d9b)
-d10<-arrange(d10,ICD10)
-write_csv(d10,"ICD_Mech.csv")
-
 
 #ASSIGN "BARELL MATRIX" TYPE CATEGORIES
 
@@ -314,20 +269,70 @@ d5<-bind_cols(d1,d4)
 d5<-rename(d5,score=...50)
 
 
-########## ADDED 2024 ###############################################
+########## ADDED OR MODIFIED 2024 ###############################################
+
+
+
+#Derive mechanism and intent for truncated codes, including basic ICD-10
+d6<-read_csv("mech6.csv")
+d7a<-mutate(d6,digits12345=str_sub(ICD10,1,5))
+d7a<-group_by(d7a,digits12345)
+d7a<-mutate(d7a,MECH5=if_else(max(MECHANISM)==min(MECHANISM),max(MECHANISM),
+                              "Other Specified"))
+d7a<-mutate(d7a,INT5=if_else(max(INTENT)==min(INTENT),max(INTENT),
+                             "Undetermined"))
+d7a<-mutate(d7a,seq=row_number())
+d7a<-ungroup(d7a)
+d7b<-filter(d7a,seq==1)
+d7b<-select(d7b,digits12345,MECH5,INT5)
+d7b<-rename(d7b,ICD10=digits12345,MECHANISM=MECH5,INTENT=INT5)
+write_csv(d7b,"mech5.csv")
+
+d8a<-mutate(d6,digits1234=str_sub(ICD10,1,4))
+d8a<-group_by(d8a,digits1234)
+d8a<-mutate(d8a,MECH4=if_else(max(MECHANISM)==min(MECHANISM),max(MECHANISM),
+                              "Other Specified"))
+d8a<-mutate(d8a,INT4=if_else(max(INTENT)==min(INTENT),max(INTENT),
+                             "Undetermined"))
+d8a<-mutate(d8a,seq=row_number())
+d8a<-ungroup(d8a)
+d8b<-filter(d8a,seq==1)
+d8b<-select(d8b,digits1234,MECH4,INT4)
+d8b<-rename(d8b,ICD10=digits1234,MECHANISM=MECH4,INTENT=INT4)
+write_csv(d8b,"mech4.csv")
+
+#Drop the following section
+#d9a<-mutate(d6,digits123=str_sub(ICD10,1,3))
+#d9a<-group_by(d9a,digits123)
+#d9a<-mutate(d9a,MECH3=if_else(max(MECHANISM)==min(MECHANISM),max(MECHANISM),
+#                             "Other Specified"))
+#d9a<-mutate(d9a,INT3=if_else(max(INTENT)==min(INTENT),max(INTENT),
+#                             "Undetermined"))
+#d9a<-mutate(d9a,seq=row_number())
+#d9a<-ungroup(d9a)
+#d9b<-filter(d9a,seq==1)
+#d9b<-select(d9b,digits123,MECH3,INT3)
+#d9b<-rename(d9b,ICD10=digits123,MECHANISM=MECH3,INTENT=INT3)
+#write_csv(d9b,"mech3.csv")
+
+d10<-bind_rows(d6,d7b,d8b)
+d10<-arrange(d10,ICD10)
+write_csv(d10,"ICD_Mech_241106.csv")
+
+
 
 #  MAKE LOOKUP TABLES FOR ICDPICR2
+
+etab<-read_csv("/Users/davideugeneclark/Documents/icdpicr/ICD_Mech_241106.csv")
+etab<-rename(etab,dx=ICD10,mechmaj=MECHANISM,intent=INTENT)
+etab<-mutate(etab,mechmin="")
+i10_map_mech<-distinct(etab)
+i10_map_mech<-mutate(i10_map_mech,version="v241106")
+write_csv(i10_map_mech,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_mech_241106.csv")
 
 i10_map_sev<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICD_AIS_241023.csv")
 i10_map_sev<-rename(i10_map_sev,dx=ICD,issbr=BR,severity=AIS)
 write_csv(i10_map_sev,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_sev_241023.csv")
-
-etab<-read_csv("/Users/davideugeneclark/Documents/icdpicr/ICD_Mech.csv")
-etab<-rename(etab,dx=ICD10,mechmaj=MECHANISM,intent=INTENT)
-etab<-mutate(etab,mechmin="")
-i10_map_mech<-distinct(etab)
-i10_map_mech<-mutate(i10_map_mech,version="v241027")
-write_csv(i10_map_mech,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_mech_241027.csv")
 
 i10_map_frame<-read_csv("/Users/davideugeneclark/Documents/icdpicr/ICD_Cells.csv")
 i10_map_frame<-rename(i10_map_frame,dx=ICD)
