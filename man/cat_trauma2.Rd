@@ -2,7 +2,7 @@
 % Please edit documentation in R/cat_trauma2.R
 \name{cat_trauma2}
 \alias{cat_trauma2}
-\title{Categorize trauma data}
+\title{Categorize trauma data and calculate scores}
 \usage{
 cat_trauma2(df, dx_pre, mech = TRUE, messages = FALSE)
 }

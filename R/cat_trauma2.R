@@ -1,6 +1,6 @@
 
 
-#' Categorize trauma data
+#' Categorize trauma data and calculate scores
 #'
 #' This function adds Abbreviated Injury Scores (AIS), Injury Severity Scores (ISS), and other descriptors of injury to a dataframe.
 #' For each observation this function will
