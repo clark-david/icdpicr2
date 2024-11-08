@@ -87,7 +87,7 @@ framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
   #---------------------------------------------------------------------------------------#
   for(i in dx_nums){
 
-    if(messages==TRUE){
+    if( (messages==TRUE) && (i%%5==0 || i==num_dx) ){
       message("Determining cell for Diagnosis ", i, " of ", num_dx)
     }
 

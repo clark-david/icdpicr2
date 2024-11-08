@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(icdpicr2)
 ```
-*Version 241105*
+*Version 241108*
 
 **===================================**\
 **REMINDER**\
@@ -107,7 +107,7 @@ Reads in user data in the specified format.  Calculates AIS, ISS, NISS, mortalit
 * **Program “iciss”**
 Reads in user data in the specified format.  Associates ICD-10 injury codes with one of the four-digit ICD-10 codes published by the WHO.   Calculates a predicted survival for each case.  Further details about the available options are provided in the help file for this function.
 
-* **Program “frame”**
+* **Program “framework”**
 Reads in user data in the specified format.  Assigns ICD-10 injury codes to a cell in the “Framework for Presenting Injury Data” developed by Hedegaard and colleagues.[12]  Calculates a predicted survival for each case.  Further details about the available options are provided in the help file for this function.
 
 
