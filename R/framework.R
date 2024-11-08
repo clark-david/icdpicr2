@@ -45,16 +45,16 @@
 #'     31416   S32110A   S3251     NA
 #'     31417   S72141A   T07XXXA   D62
 #' ")
-#' df_out <- frame(df_in, "dx", TRUE, FALSE)
+#' df_out <- framework(df_in, "dx", TRUE, FALSE)
 #'
 #' @importFrom stringr str_extract
 #' @importFrom stats na.omit
 #' @export
 
 
-frame <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
+framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
 
-  #Version 241101
+  #Version 241108
 
   require(dplyr)
   require(readr)
@@ -171,4 +171,4 @@ frame <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
   # Return dataframe
   df
 
-} #END frame
+} #END framework
