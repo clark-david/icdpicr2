@@ -97,7 +97,7 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
   #---------------------------------------------------------------------------------#
   for(i in dx_nums){
 
-    if(messages==TRUE & (i%%5==0 | i==dx_nums)){
+    if( (messages==TRUE) && (i%%5==0 || i==num_dx) ){
       message("Determining severity of Diagnosis ", i, " of ", num_dx)
     }
 
