@@ -78,9 +78,9 @@ Version 2.0.0 of “icdpicr”, named “icdpicr2”, is a further update in res
 
 	4. Assigns an AIS score to truncated ICD-10-CM codes (3-6 digits long) as a weighted average of the corresponding 7-digit ICD-10-CM codes. This includes most basic ICD-10 codes.
 
-	5. Assigns an AIS score to ICD-10 injury codes published by the WHO, using the data of Gedeborg and colleagues.[8]  When available, these AIS scores replace those determined in the step above.  Creates a table of all valid ICD-10 diagnosis codes with associated body region and AIS in order to calculate ISS; also includes direct effects from regression.  Creates another table with “Diagnosis-specific Survival Probabilities” (DSP) for 4-digit ICD-10 codes, either obtained directly from the data of Gedeborg and colleagues [8] or indirectly by assignment of DSP to a 4-digit truncation of longer diagnosis codes; these can be used to calculate an “ICD-based Injury Severity Score” (ICISS).[8,12]
+	5. Assigns an AIS score to ICD-10 injury codes published by the WHO, using the data of Gedeborg and colleagues.[8]  When available, these AIS scores replace those determined in the step above.  Creates a table of all valid ICD-10 diagnosis codes with associated body region and AIS in order to calculate ISS; also includes direct effects from regression.  Creates another table with “Diagnosis-specific Survival Probabilities” (DSP) for 4-digit ICD-10 codes, either obtained directly from the data published by Gedeborg and colleagues [8] or indirectly by assignment of DSP to a 4-digit truncation of longer diagnosis codes; these can be used to calculate an “ICD-based Injury Severity Score” (ICISS).[8,12]
 
-* **icd10aisE** (New in Version 2.0.0) – Produces a table of injury mechanisms and intents based upon codes starting with U, V, W, X, or Y in ICD-10 data.[11]  Produces a table corresponding to the “Framework for Presenting Injury Data” published by the CDC,[13] modeled after the “Barell Matrix” previously developed for ICD-9.  The TQP PUF and NIS survival for subjects with an ICD-10-CM diagnosis in each cell of the framework is also calculated, and the minimum cell survival for a given subject is provided as a rough estimate of severity.[14]
+* **icd10aisE** (New in Version 2.0.0) – Produces a table of injury mechanisms and intents based upon codes starting with U, V, W, X, or Y in ICD-10 data.[11]  Produces a table corresponding to the “Framework for Presenting Injury Data” developed by the CDC,[13] modeled after the “Barell Matrix” previously developed for ICD-9.  The TQP PUF and NIS survival for subjects with an ICD-10-CM diagnosis in each cell of the framework is also calculated, and the minimum cell survival for a given subject is provided as a rough estimate of severity.[14]
 
 
 Programs icd10aisA, icd10aisB, icd10aisC, icd10aisD, and icd10aisE can be found at https://github.com/clark-david/icdpicr2/
@@ -92,9 +92,9 @@ Programs icd10aisA, icd10aisB, icd10aisC, icd10aisD, and icd10aisE can be found 
 
 * **i10_map_mech:**  This table is new in Version 2.0.0, replacing i10_ecode.  It uses the results of icd10aisE to assign a mechanism category for any ICD-10 external cause of injury code (starting with letters U, V, W, X, or Y), using a table proposed by the CDC.[11]
 
-* **i10_map_iciss:**  This table is new in Version 2.0.0.  It uses the results of icd10aisD to assign ICD-10 injury codes to a 4-digit ICD-10 code and its associated survival probability as determined by Gedeborg and colleagues.[8]
+* **i10_map_iciss:**  This table is new in Version 2.0.0.  It uses the results of icd10aisD to assign ICD-10 injury codes to a 4-digit ICD-10 code and its associated survival probability as published by Gedeborg and colleagues.[8]
 
-* **i10_map_frame:**  This table is new in Version 2.0.0.  It uses the results of icd10aisE to assign ICD-10 injury codes to a cell in the “Framework for Presenting Injury Data” developed by Hedegaard and colleagues.[13]
+* **i10_map_frame:**  This table is new in Version 2.0.0.  It uses the results of icd10aisE to assign ICD-10 injury codes to a cell in the “Framework for Presenting Injury Data” published by Hedegaard and colleagues.[13]
 
 * **testdata:**  Sample data that can be used to demonstrate the functioning of the programs.
 
@@ -108,7 +108,7 @@ Reads in user data in the specified format.  Calculates AIS, ISS, NISS, mortalit
 Reads in user data in the specified format.  Associates ICD-10 injury codes with one of the four-digit ICD-10 codes published by the WHO.   Calculates a predicted survival for each case.  Further details about the available options are provided in the help file for this function.
 
 * **Program “framework”**
-Reads in user data in the specified format.  Assigns ICD-10 injury codes to a cell in the “Framework for Presenting Injury Data” developed by Hedegaard and colleagues.[12]  Calculates a predicted survival for each case.  Further details about the available options are provided in the help file for this function.
+Reads in user data in the specified format.  Assigns ICD-10 injury codes to a cell in the CDC “Framework for Presenting Injury Data”.[13]  Calculates a predicted survival for each case.  Further details about the available options are provided in the help file for this function.
 
 
 ### **References**
