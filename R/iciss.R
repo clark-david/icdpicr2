@@ -99,7 +99,7 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
   for(i in dx_nums){
 
     if( (messages==TRUE) && (i%%5==0 || i==num_dx) ){
-      message("Determining cell for Diagnosis ", i, " of ", num_dx)
+      message("Determining DSP for Diagnosis ", i, " of ", num_dx)
     }
 
     # Create column name
