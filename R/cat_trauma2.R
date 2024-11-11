@@ -63,7 +63,7 @@
 
 cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
 
-  #Version 241108
+  #Version 241111
 
   require(dplyr)
   require(readr)
