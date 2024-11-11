@@ -92,11 +92,15 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
   }
 
 
-  #---------------------------------------------------------------------------------------#
-  #  Merge diagnosis code variables with Barell Code reference table to obtain cell name  #
-  #  and cell survival probability for each diagnosis code and add them to the data       #
-  #---------------------------------------------------------------------------------------#
+  #------------------------------------------------------------------------------------#
+  #  Merge diagnosis code variables with reference table to obtain cell name           #
+  #  and cell survival probability for each diagnosis code and add them to the data    #
+  #------------------------------------------------------------------------------------#
   for(i in dx_nums){
+
+    if( (messages==TRUE) && (i%%5==0 || i==num_dx) ){
+      message("Determining cell for Diagnosis ", i, " of ", num_dx)
+    }
 
     # Create column name
     dx_name <- paste0(dx_pre, i)
@@ -132,10 +136,9 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
   }   #END FOR LOOP (i in dxno)
 
 
-  #---------------------------------------------------------------------#
-  # Add mortality prediction for ICD-10-cm codes from cells #
-  #---------------------------------------------------------------------#
-
+  #----------------------------------------------------------#
+  # Add mortality prediction for ICD-10-cm codes from cells  #
+  #----------------------------------------------------------#
 
   if(messages==TRUE){
     mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)

@@ -82,7 +82,7 @@ framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
   ftab <- ftab[ , c("dx","cell","PsCell")]
 
   #---------------------------------------------------------------------------------------#
-  #  Merge diagnosis code variables with Barell Code reference table to obtain cell name  #
+  #  Merge diagnosis code variables with reference table to obtain cell name              #
   #  and cell survival probability for each diagnosis code and add them to the data       #
   #---------------------------------------------------------------------------------------#
   for(i in dx_nums){
@@ -126,9 +126,9 @@ framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
 
 
   if (severity==TRUE) {
-    #---------------------------------------------------------------------#
-    # Add mortality prediction for ICD-10-cm codes from cells #
-    #---------------------------------------------------------------------#
+    #----------------------------------------------------------#
+    # Add mortality prediction for ICD-10-cm codes from cells  #
+    #----------------------------------------------------------#
 
 
     if(messages==TRUE){
