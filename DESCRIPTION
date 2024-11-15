@@ -20,4 +20,5 @@ Suggests:
 VignetteBuilder: knitr
 Imports: 
     dplyr,
-    readr
+    readr,
+    tidyr

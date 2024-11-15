@@ -54,6 +54,6 @@ df_in <- read.table(header = TRUE, text = "
     31416   S32110A   S3251     NA
     31417   S72141A   T07XXXA   D62
 ")
-df_out <- cat_trauma2(df_in, "dx", TRUE, FALSE)
+df_out <- cat_trauma2(df_in, "dx", TRUE)
 
 }

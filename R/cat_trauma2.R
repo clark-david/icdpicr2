@@ -46,7 +46,7 @@
 #'     31416   S32110A   S3251     NA
 #'     31417   S72141A   T07XXXA   D62
 #' ")
-#' df_out <- cat_trauma2(df_in, "dx", TRUE, FALSE)
+#' df_out <- cat_trauma2(df_in, "dx", TRUE)
 #'
 #' @importFrom stringr str_extract
 #' @importFrom stats na.omit
@@ -59,6 +59,7 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
 
   require(dplyr)
   require(readr)
+  require(tidyr)
   starttime=Sys.time()
 
   # Verify input
