@@ -1,5 +1,4 @@
 
-
 #' Categorize trauma data and calculate scores
 #'
 #' This function adds Abbreviated Injury Scores (AIS), Injury Severity Scores (ISS), and other descriptors of injury to a dataframe.
@@ -11,18 +10,10 @@
 #'    \item select the first 4 mechanism (external cause) codes and categorize mechanism and intent following CDC guidelines
 #'}
 #'
-#'
 #' @param df A dataframe in wide format containing ICD-10 diagnosis codes with a common column name prefix.
 #'           Diagnosis codes should be character strings and may have a decimal or not.
 #'
 #' @param dx_pre Prefix for diagnosis code column names (example: dx1, dx2, etc.)
-#'
-#'
-#' @param mech Should the program determine mechanism? Must be TRUE (default) or FALSE.
-#'          \itemize{
-#'          \item TRUE - Injury mechanism (external cause) codes will be sought and processed by the program.
-#'          \item FALSE - This portion of the program will be skipped (to save time).
-#'          }
 #'
 #' @param messages Should the program report completion of each step? Must be TRUE or FALSE (default).
 #'          \itemize{
@@ -40,11 +31,11 @@
 #'          \item maxais: maximum AIS severity over all ISS body regions
 #'          \item riss: computed injury severity score
 #'          \item niss: new injury severity score
-#'          \item ecode_1-ecode_4: first 4 mechanism codes found in each row of data
-#'          \item mechmaj1-mechmaj4: CDC external cause of injury major mechanism for each mechanism code captured
-#'          \item intent1-intent4: intent for each mechanism code captured
 #'          \item PmortTQP: The TQP model predicted probability of mortality
 #'          \item PmortNIS: The NIS model predicted probability of mortality
+#'          \item mechcode_1-mechcode_4: first 4 mechanism codes found in each row of data
+#'          \item mech_1-mech_4: CDC external cause of injury major mechanism for each mechanism code captured
+#'          \item intent_1-intent_4: intent for each mechanism code captured
 #'          }
 #'
 #' @details  Data should be in wide format, as in the example below:
@@ -61,9 +52,10 @@
 #' @importFrom stats na.omit
 #' @export
 
-cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
 
-  #Version 241111
+cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
+
+  #Version 241115
 
   require(dplyr)
   require(readr)
@@ -89,7 +81,6 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
 
   ntab <- i10_map_sev
   ntab <- ntab[ , c("dx","severity","issbr")]
-  etab <- i10_map_mech
 
   #---------------------------------------------------------------------------------#
   #  Merge diagnosis code variables with N-Code reference table to obtain severity  #
@@ -179,7 +170,6 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
   #----------------------------------------------------------------------#
   #  Calculate maximum severity over all ISS body regions, excluding 9s  #
   #----------------------------------------------------------------------#
-
   # Define function to convert 9 to 0
   c9to0 <- function(x) ifelse(x == 9, 0, x)
 
@@ -204,9 +194,9 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
   df$maxais <- as.numeric(df$maxais)
 
 
-  #------------------------#
-  #  Calculate ISS value.  #
-  #------------------------#
+  #-----------------------#
+  #  Calculate ISS value  #
+  #-----------------------#
   if(messages==TRUE){
     message("Calculating Injury Severity Score ")
   }
@@ -258,82 +248,6 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
   # If maxais is 9 this implies that there were only injuries of unknown severity
   df[df$maxais == 9, "niss"] <- NA
 
-
-
-  if(mech==TRUE) {
-
-    #-----------------------------------------------------------------------#
-    #  Merge diagnosis codes with mechanism code reference table to obtain  #
-    #  major mechanism, minor mechanism and intent variables for up to 4    #
-    #  mechanism codes and add them to the data.                            #
-    #  In ICD-9, mechanism codes started with the letter E,                 #
-    #  and they are still often called E-codes                                   #
-    #-----------------------------------------------------------------------#
-
-    if(messages==TRUE){
-      mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
-      message("Time elapsed ", mindiff, " minutes")
-      message("Compiling mechanism codes -- the most time-consuming step")
-    }
-    # Get ecode column names
-    ecode_colnames <- paste0("ecode_", 1:4)
-
-    # Create ecode columns
-    df[ , ecode_colnames] <- NA
-
-    # For each row extract the first 4 mechanism codes and add them to the "e-code" columns
-    # ICD10 mechanism codes do not start with E.
-
-    # Get a list of all mechanism codes
-    ecode_regex <- paste0("^", etab$dx, collapse = "|")
-
-    df[ , ecode_colnames] <- t(apply(df, 1, function(row){
-      # remove decimal
-      row <- sub("\\.", "", row)
-      # get all mechanism codes using pattern matching
-      row_ecodes <- stringr::str_extract(as.character(unlist(row)), ecode_regex)
-      # remove NA values
-      row_ecodes <- na.omit(row_ecodes)
-      # save first 4 Ecodes
-      row_ecodes[1:4]
-    }))
-
-
-    # Loop through mechanism codes and add associated variables from table
-    for(i in 1:4){
-      if(messages==TRUE){
-        message("Determining mechanism for Diagnosis ", i, " of 4")
-      }
-      col_name <- paste("ecode_", i, sep="")
-
-      # Subset dataframe: pull just the diagnosis code column of interest
-      df_ss <- df[,col_name, drop = FALSE]
-
-      # Add row variable for sorting back to original order
-      df_ss$n <- 1:NROW(df_ss)
-
-      # Strip out decimal
-      df_ss[,col_name] <- sub("\\.","", df_ss[,col_name])
-
-      # Merge in ecode variables
-      temp <- merge(df_ss, etab, by.x=col_name, by.y="dx", all.x = TRUE, all.y = FALSE, sort = FALSE)
-
-      # Reorder rows after merge
-      temp <- temp[order(temp$n), ]
-
-      # Drop dx and n
-      temp <- temp[,c("mechmaj", "mechmin", "intent")]
-
-      # Rename columns
-      names(temp) <- paste(c("mechmaj", "mechmin", "intent"), i, sep="")
-
-      # Add columns to dataframe
-      df <- .insert_columns(df, col_name, temp)
-
-    }  #END for loop
-
-  }  #END if mech==TRUE
-
   if(messages==TRUE){
     mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
     message("Time elapsed ", mindiff, " minutes")
@@ -341,10 +255,9 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
   }
 
 
-  #---------------------------------------------------------------------#
-  # Add mortality prediction for ICD-10-cm codes from regression models #
-  #---------------------------------------------------------------------#
-
+  #-------------------------------------------------#
+  # Add mortality prediction from regression models #
+  #-------------------------------------------------#
   coef_df <- select(i10_map_sev,dx,TQIPeffect,TQIPint)
   intercept <- max(coef_df$TQIPint,na.rm=TRUE)
   # Create hash table
@@ -379,27 +292,74 @@ cat_trauma2 <- function(df, dx_pre, mech = TRUE, messages = FALSE) {
   mat <- as.matrix(df[,grepl(paste0("^", dx_pre), names(df))])
   df$PmortNIS <- apply(mat, 1, calc_mortality_prediction)
 
+
+  #--------------------------------------------------#
+  # Extract mechanism codes and add them to the data #
+  #--------------------------------------------------#
+
+  if(messages==TRUE) {
+    mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
+    message("Time elapsed ", mindiff, " minutes")
+    message("Extracting mechanism codes")
+  }
+
+  # Obtain table of valid mechanism codes
+  etab <- i10_map_mech
+  etab <- etab[ , c("dx","mechmaj","intent")]
+
+  # Duplicate table of diagnoses and convert to long form
+  df_mech <- df
+  df_mech <- mutate(df_mech,RowID=row_number())
+  df_mech <- select(df_mech,RowID,starts_with(dx_pre))
+  df_mech <- pivot_longer(df_mech,cols=starts_with(dx_pre),names_to="ColName")
+  df_mech <- group_by(df_mech,RowID)
+  df_mech <- mutate(df_mech,ColID1=row_number())
+  df_mech <- ungroup(df_mech)
+  df_mech <- rename(df_mech,dx=value)
+  df_mech <- select(df_mech,-ColName)
+  # Strip out decimal in all codes, if present
+  df_mech <- mutate(df_mech,dx=str_replace(dx,"\\.",""))
+
+
+  # Merge tables and select first four "columns" with mechanism data
+  df_merged <- left_join(df_mech,etab,by="dx",relationship="many-to-many")
+  df_merged <- mutate(df_merged,ColID1=if_else(is.na(mechmaj),99,ColID1))
+  df_merged <- group_by(df_merged,RowID)
+  df_merged <- arrange(df_merged,ColID1)
+  df_merged <- mutate(df_merged,ColID2=row_number())
+  df_merged <- ungroup(df_merged)
+  df_merged <- filter(df_merged,ColID2<=4)
+  df_merged <- mutate(df_merged,dx=if_else(is.na(mechmaj),NA,dx))
+  df_merged <- select(df_merged,-ColID1)
+  df_merged <- rename(df_merged,mechcode=dx,mech=mechmaj)
+
+  # Convert back to wide form and merge with original dataframe
+  df_merged_wide <- pivot_wider(df_merged,id_cols=RowID,values_from=c(mechcode,mech,intent),
+                                names_from=ColID2)
+  df_merged_wide <- arrange(df_merged_wide,RowID)
+  df_merged_wide <- select(df_merged_wide,-RowID)
+  df <- bind_cols(df,df_merged_wide)
+
+
   if(messages==TRUE){
     mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
     message("Time elapsed ", mindiff, " minutes")
   }
-
 
   # Set rownames
   rownames(df) <- 1:nrow(df)
 
   message("=============================================")
   message("REMINDER")
-  message("ICDPICR Version 2.0.0 IS BEING TESTED")
+  message("ICDPICR Version 2.0.1 IS BEING TESTED")
   message("Major bugs and flaws may still exist")
   message("Please report issues to david.clark@tufts.edu")
   message("or at github/clark-david/icdpicr2/issues")
   message("==============================================")
 
-
   # Return dataframe
   df
 
-} #END
+} #END FUNCTION
 
 

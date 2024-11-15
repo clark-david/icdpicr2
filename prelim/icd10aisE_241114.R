@@ -315,20 +315,62 @@ write_csv(d8b,"mech4.csv")
 #d9b<-rename(d9b,ICD10=digits123,MECHANISM=MECH3,INTENT=INT3)
 #write_csv(d9b,"mech3.csv")
 
-d10<-bind_rows(d6,d7b,d8b)
-d10<-arrange(d10,ICD10)
-write_csv(d10,"ICD_Mech_241106.csv")
+#Get all mechanism codes from NIS and TQP (7 digits)
+#Assign categories based on truncated 6-digit equivalent, if any
+dnis0 <- read_csv("nisraw2020.csv")
+dnis1 <- select(dnis0,-AGE,-DIED,-DISPUNIFORM,-ELECTIVE,-HCUP_ED,-INJURY,-INC_KEY,-LOS,-seq)
+dnis2 <- pivot_longer(dnis1,cols=starts_with("I10_DX"),names_to="ecode")
+dnis3 <- mutate(dnis2,validmech=case_when(
+              str_sub(value,1,1)=="T" & str_sub(value,2,1)=="5" ~ 1,
+              str_sub(value,1,1)=="T" & str_sub(value,2,1)=="6" ~ 1,
+              str_sub(value,1,1)=="T" & str_sub(value,2,1)=="7" ~ 1,
+              str_sub(value,1,1)=="V" ~ 1,
+              str_sub(value,1,1)=="W" ~ 1,
+              str_sub(value,1,1)=="X" ~ 1,
+              str_sub(value,1,1)=="Y" & str_sub(value,2,1)=="0" ~ 1,
+              str_sub(value,1,1)=="Y" & str_sub(value,2,1)=="2" ~ 1,
+              str_sub(value,1,1)=="Y" & str_sub(value,2,1)=="3" ~ 1,
+              TRUE ~ 0
+          ))
+dnis4 <- filter(dnis3,validmech==1)
+dnis4 <- rename(dnis4,ICD10=value)
+dnis4 <- select(dnis4,ICD10)
 
+dtqp0 <- read.csv("/Users/davideugeneclark/Documents/icdpicr/PUF AY 2020/CSV/PUF_TRAUMA.csv")  
+dtqp1 <- select(dtqp0,PRIMARYECODEICD10)
+dtqp2 <- mutate(dtqp1,predot=str_sub(PRIMARYECODEICD10,1,3))
+dtqp2 <- mutate(dtqp2,postdot=str_sub(PRIMARYECODEICD10,5,8))
+dtqp2 <- mutate(dtqp2,ICD10=str_c(predot,postdot))
+dtqp3 <- select(dtqp2,ICD10)
+
+dnistqp0 <- bind_rows(dnis4,dtqp3,d6)
+dnistqp0 <- group_by(dnistqp0,ICD10)
+dnistqp0 <- mutate(dnistqp0,seq=row_number())
+dnistqp0 <- ungroup(dnistqp0)
+
+dnistqp1 <- filter(dnistqp0,seq==1)
+dnistqp1 <- mutate(dnistqp1,digits123456=str_sub(ICD10,1,6))
+dnistqp1 <- group_by(dnistqp1,digits123456)
+dnistqp1 <- mutate(dnistqp1,MECHANISM=max(MECHANISM,na.rm=TRUE))
+dnistqp1 <- mutate(dnistqp1,INTENT=max(INTENT,na.rm=TRUE))
+dnistqp1 <- ungroup(dnistqp1)
+
+dnistqp2 <- arrange(dnistqp1,ICD10)
+dnistqp2 <- select(dnistqp2,-seq,-digits123456)
+
+d10<-bind_rows(dnistqp2,d7b,d8b)
+d10<-arrange(d10,ICD10)
+write_csv(d10,"ICD_Mech_241114.csv")
 
 
 #  MAKE LOOKUP TABLES FOR ICDPICR2
 
-etab<-read_csv("/Users/davideugeneclark/Documents/icdpicr/ICD_Mech_241106.csv")
+etab<-read_csv("/Users/davideugeneclark/Documents/icdpicr/ICD_Mech_241114.csv")
 etab<-rename(etab,dx=ICD10,mechmaj=MECHANISM,intent=INTENT)
 etab<-mutate(etab,mechmin="")
 i10_map_mech<-distinct(etab)
-i10_map_mech<-mutate(i10_map_mech,version="v241106")
-write_csv(i10_map_mech,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_mech_241106.csv")
+i10_map_mech<-mutate(i10_map_mech,version="v241114")
+write_csv(i10_map_mech,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_mech_241114.csv")
 
 i10_map_sev<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICD_AIS_241023.csv")
 i10_map_sev<-rename(i10_map_sev,dx=ICD,issbr=BR,severity=AIS)

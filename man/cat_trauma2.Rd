@@ -4,19 +4,13 @@
 \alias{cat_trauma2}
 \title{Categorize trauma data and calculate scores}
 \usage{
-cat_trauma2(df, dx_pre, mech = TRUE, messages = FALSE)
+cat_trauma2(df, dx_pre, messages = TRUE)
 }
 \arguments{
 \item{df}{A dataframe in wide format containing ICD-10 diagnosis codes with a common column name prefix.
 Diagnosis codes should be character strings and may have a decimal or not.}
 
 \item{dx_pre}{Prefix for diagnosis code column names (example: dx1, dx2, etc.)}
-
-\item{mech}{Should the program determine mechanism? Must be TRUE (default) or FALSE.
-\itemize{
-\item TRUE - Injury mechanism (external cause) codes will be sought and processed by the program.
-\item FALSE - This portion of the program will be skipped (to save time).
-}}
 
 \item{messages}{Should the program report completion of each step? Must be TRUE or FALSE (default).
 \itemize{
@@ -34,11 +28,11 @@ A dataframe identical to the dataframe passed to the function with the following
          \item maxais: maximum AIS severity over all ISS body regions
          \item riss: computed injury severity score
          \item niss: new injury severity score
-         \item ecode_1-ecode_4: first 4 mechanism codes found in each row of data
-         \item mechmaj1-mechmaj4: CDC external cause of injury major mechanism for each mechanism code captured
-         \item intent1-intent4: intent for each mechanism code captured
          \item PmortTQP: The TQP model predicted probability of mortality
          \item PmortNIS: The NIS model predicted probability of mortality
+         \item mechcode_1-mechcode_4: first 4 mechanism codes found in each row of data
+         \item mech_1-mech_4: CDC external cause of injury major mechanism for each mechanism code captured
+         \item intent_1-intent_4: intent for each mechanism code captured
          }
 }
 \description{

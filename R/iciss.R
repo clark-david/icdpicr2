@@ -181,7 +181,7 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
 
   message("=============================================")
   message("REMINDER")
-  message("ICDPICR Version 2.0.0 IS BEING TESTED")
+  message("ICDPICR Version 2.0.1 IS BEING TESTED")
   message("Major bugs and flaws may still exist")
   message("Please report issues to david.clark@tufts.edu")
   message("or at github/clark-david/icdpicr2/issues")
