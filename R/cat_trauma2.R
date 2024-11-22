@@ -46,7 +46,7 @@
 #'     31416   S32110A   S3251     NA
 #'     31417   S72141A   T07XXXA   D62
 #' ")
-#' df_out <- cat_trauma2(df_in, "dx", TRUE)
+#' df_out <- cat_trauma2(df_in, "dx", TRUE, FALSE)
 #'
 #' @importFrom stringr str_extract
 #' @importFrom stats na.omit
@@ -59,8 +59,6 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
 
   require(dplyr)
   require(readr)
-  require(tidyr)
-  require(stringr)
   starttime=Sys.time()
 
   # Verify input
@@ -353,7 +351,7 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
 
   message("=============================================")
   message("REMINDER")
-  message("ICDPICR Version 2.0.1 IS BEING TESTED")
+  message("ICDPICR Version 2.0.2 IS BEING TESTED")
   message("Major bugs and flaws may still exist")
   message("Please report issues to david.clark@tufts.edu")
   message("or at github/clark-david/icdpicr2/issues")

@@ -567,7 +567,7 @@ d123<-rename(d123,ICD=digits123,AIS=AIS3,BR=BR3)
 
 write_csv(d123,"ICDAIS_2A.csv")
 
-d123 <- read_csv("ICDAIS_2A.csv")
+d123 <- read_csv("/Users/davideugeneclark/Documents/icdpicr/ICDAIS_2A.csv")
 
 d1renamed<-rename(d1,BR=BR1,AIS=AIS2)
 d6<-bind_rows(d123,d1234,d12345,d123456,d1renamed)
@@ -577,20 +577,24 @@ d6<-select(d6,ICD,AIS,BR,TQIPeffect,TQIPint,NISeffect,NISint)
 
 write_csv(d6,"ICDAIS_4.csv")
 
+####################### FOLLOWING CODE MODIFIED NOVEMBER 2024 ###############################
 
-#Get list of valid ICD10 (international) codes not obtainable by truncation
+
+#Get list of valid ICD-10 (international) codes 
 #Table modified from Gedeborg et al., Journal of Trauma 2014
 #  Excludes diagnoses outside National Trauma Data Standard (see icd10aisA)
-#  Adds a few codes (S137,S577,S732,S737,S738) 
-#  Indicates codes already in ICDAIS_4.csv
-#  Assigns body region
+#  Adds a few WHO ICD-10 codes not in Gedeborg (S137,S577,S732,S737,S738) 
+#  Adds most frequent truncated ICD-10-CM codes not in Gedeborg
+#     (S123,S124,S125,S126,S138,S161,S209,S316,S402,S503,S605,S614,S802)
+#  Assins a DSP to added codes "borrowed" from a related ICD-10 code
+#  Assigns an ISS body region to all codes in list
 
-dged <- read_csv("/Users/davideugeneclark/Documents/icdpicr2/gedeborg_modified.csv")
+dged <- read_csv("/Users/davideugeneclark/Documents/icdpicr2/gedeborg_modified_241119.csv")
 dged <- rename(dged,ICD=icd10)
 dged <- rename(dged,BR=br)
 dged <- mutate(dged,mort=(totaln-survivors)/totaln)
 
-#Assign AIS, somewhat arbitrarily, based on diagnosis-specific mortality 
+#Assign AIS, somewhat arbitrarily, based on diagnosis-specific mortality (DSM)
 #  and compare to ais from truncation already in ICDAIS_4.csv
 
 dged <- mutate(dged,AIS=case_when(
@@ -606,12 +610,12 @@ tabyl(dged,AIS,added)
 
 dged <- select(dged,ICD,AIS,BR,already_in,totaln,dsp)
 
-#Add remaining diagnoses to ICDAIS_4.csv
+#Add resulting diagnosis codes to ICDAIS_4.csv
 d6 <- read_csv("/Users/davideugeneclark/Documents/icdpicr/ICDAIS_4.csv")
 d6 <- bind_rows(d6,dged)
 write_csv(d6,"/Users/davideugeneclark/Documents/icdpicr2/ICDAIS_5.csv")
 
-
+#UPDATE VERSION AND FILENAMES
 #Unduplicate to create ICD_AIS.csv
 #Sort in such a way that information is used from Gedeborg if available
 d7<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICDAIS_5.csv")
@@ -620,9 +624,9 @@ d7<-group_by(d7,ICD)
 d7<-mutate(d7,seq=row_number())
 d7<-ungroup(d7)
 d7<-filter(d7,seq==1)
-d7<-mutate(d7,version="v241023")
+d7<-mutate(d7,version="v241119")
 d7<-select(d7,-seq,-already_in,-totaln,-dsp)
-write_csv(d7,"/Users/davideugeneclark/Documents/icdpicr2/ICD_AIS_241023.csv")
+write_csv(d7,"/Users/davideugeneclark/Documents/icdpicr2/ICD_AIS_241119.csv")
 
 #Unduplicate to create i10_map_iciss.csv
 d8<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICDAIS_5.csv")
@@ -643,8 +647,8 @@ d8<-mutate(d8,dsp_cons=if_else(totaln<5,1,dsp))
 d8<-select(d8,ICD,totaln,dsp,dsp_cons)
 d8<-rename(d8,dsp_noncons=dsp)
 d8<-rename(d8,dx=ICD)
-d8<-mutate(d8,version="v241025")
-write_csv(d8,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_iciss_241025.csv")
+d8<-mutate(d8,version="v241119")
+write_csv(d8,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_iciss_241119.csv")
 
 
         

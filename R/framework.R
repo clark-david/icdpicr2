@@ -1,6 +1,5 @@
 
 
-
 #' Categorize ICD-10 injury diagnosis codes similar to the "Barell Matrix" used for ICD-9
 #'
 #'
@@ -54,7 +53,7 @@
 
 framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
 
-  #Version 241111
+  #Version 241121
 
   require(dplyr)
   require(readr)
@@ -162,7 +161,7 @@ framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
 
   message("=============================================")
   message("REMINDER")
-  message("ICDPICR Version 2.0.1 IS BEING TESTED")
+  message("ICDPICR Version 2.0.2 IS BEING TESTED")
   message("Major bugs and flaws may still exist")
   message("Please report issues to david.clark@tufts.edu")
   message("or at github/clark-david/icdpicr2/issues")

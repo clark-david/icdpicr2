@@ -274,8 +274,21 @@ d5<-rename(d5,score=...50)
 
 
 #Derive mechanism and intent for truncated codes, including basic ICD-10
-d6<-read_csv("mech6.csv")
-d7a<-mutate(d6,digits12345=str_sub(ICD10,1,5))
+d6<-read_csv("/Users/davideugeneclark/Documents/icdpicr/mech6.csv")
+
+#Add a few common mechanisms not in CDC lists
+others<-read.table(header=TRUE, quote="'", text="
+   ICD10    MECHANISM                   INTENT
+   V00131   'Pedestrian, other'       Unintentional
+   V00141   'Pedestrian, other'       Unintentional
+   V80010   'Other Land Transport'    Unintentional
+   W01198    Fall                     Unintentional
+   W01190    Fall                     Unintentional
+   X959XX    Firearm                  Assault
+   ")
+d6a<-bind_rows(d6,others)
+
+d7a<-mutate(d6a,digits12345=str_sub(ICD10,1,5))
 d7a<-group_by(d7a,digits12345)
 d7a<-mutate(d7a,MECH5=if_else(max(MECHANISM)==min(MECHANISM),max(MECHANISM),
                               "Other Specified"))
@@ -288,7 +301,7 @@ d7b<-select(d7b,digits12345,MECH5,INT5)
 d7b<-rename(d7b,ICD10=digits12345,MECHANISM=MECH5,INTENT=INT5)
 write_csv(d7b,"mech5.csv")
 
-d8a<-mutate(d6,digits1234=str_sub(ICD10,1,4))
+d8a<-mutate(d6a,digits1234=str_sub(ICD10,1,4))
 d8a<-group_by(d8a,digits1234)
 d8a<-mutate(d8a,MECH4=if_else(max(MECHANISM)==min(MECHANISM),max(MECHANISM),
                               "Other Specified"))
@@ -317,7 +330,7 @@ write_csv(d8b,"mech4.csv")
 
 #Get all mechanism codes from NIS and TQP (7 digits)
 #Assign categories based on truncated 6-digit equivalent, if any
-dnis0 <- read_csv("nisraw2020.csv")
+dnis0 <- read_csv("/Users/davideugeneclark/Documents/icdpicr/nisraw2020.csv")
 dnis1 <- select(dnis0,-AGE,-DIED,-DISPUNIFORM,-ELECTIVE,-HCUP_ED,-INJURY,-INC_KEY,-LOS,-seq)
 dnis2 <- pivot_longer(dnis1,cols=starts_with("I10_DX"),names_to="ecode")
 dnis3 <- mutate(dnis2,validmech=case_when(
@@ -343,10 +356,12 @@ dtqp2 <- mutate(dtqp2,postdot=str_sub(PRIMARYECODEICD10,5,8))
 dtqp2 <- mutate(dtqp2,ICD10=str_c(predot,postdot))
 dtqp3 <- select(dtqp2,ICD10)
 
-dnistqp0 <- bind_rows(dnis4,dtqp3,d6)
+dnistqp0 <- bind_rows(dnis4,dtqp3,d6a)
 dnistqp0 <- group_by(dnistqp0,ICD10)
+dnistqp0 <- arrange(dnistqp0,MECHANISM)
 dnistqp0 <- mutate(dnistqp0,seq=row_number())
 dnistqp0 <- ungroup(dnistqp0)
+dnistqp0 <- arrange(dnistqp0,ICD10)
 
 dnistqp1 <- filter(dnistqp0,seq==1)
 dnistqp1 <- mutate(dnistqp1,digits123456=str_sub(ICD10,1,6))
@@ -360,21 +375,22 @@ dnistqp2 <- select(dnistqp2,-seq,-digits123456)
 
 d10<-bind_rows(dnistqp2,d7b,d8b)
 d10<-arrange(d10,ICD10)
-write_csv(d10,"ICD_Mech_241114.csv")
+write_csv(d10,"/Users/davideugeneclark/Documents/icdpicr2/ICD_Mech_241120.csv")
 
 
 #  MAKE LOOKUP TABLES FOR ICDPICR2
 
-etab<-read_csv("/Users/davideugeneclark/Documents/icdpicr/ICD_Mech_241114.csv")
+etab<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICD_Mech_241120.csv")
 etab<-rename(etab,dx=ICD10,mechmaj=MECHANISM,intent=INTENT)
 etab<-mutate(etab,mechmin="")
 i10_map_mech<-distinct(etab)
-i10_map_mech<-mutate(i10_map_mech,version="v241114")
-write_csv(i10_map_mech,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_mech_241114.csv")
+i10_map_mech<-mutate(i10_map_mech,version="v241120")
+write_csv(i10_map_mech,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_mech_241120.csv")
 
-i10_map_sev<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICD_AIS_241023.csv")
+i10_map_sev<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICD_AIS_241119.csv")
 i10_map_sev<-rename(i10_map_sev,dx=ICD,issbr=BR,severity=AIS)
-write_csv(i10_map_sev,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_sev_241023.csv")
+i10_map_sev<-mutate(i10_map_sev,version="v241120")
+write_csv(i10_map_sev,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_sev_241120.csv")
 
 i10_map_frame<-read_csv("/Users/davideugeneclark/Documents/icdpicr/ICD_Cells.csv")
 i10_map_frame<-rename(i10_map_frame,dx=ICD)

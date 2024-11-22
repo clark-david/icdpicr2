@@ -56,7 +56,7 @@
 
 iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
 
-  #Version 241111
+  #Version 241118
 
   require(dplyr)
   require(readr)
@@ -154,7 +154,9 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
   names(effect_hash) <- coef_df$dx
   calc_mortality_prediction <- function(dx){
     # dx is a character vector of diagnosis codes for one person
+    # prod() returns 1 for empty set, hence the following:
     x <- prod(effect_hash[sub("\\.", "", dx)], na.rm = TRUE)
+    x <- if_else( all(is.na(effect_hash[sub("\\.", "", dx)])),NA,x)
   }
   mat <- as.matrix(df[,grepl(paste0("^", dx_pre), names(df))])
   df$PS_iciss_prod <- apply(mat, 1, calc_mortality_prediction)
@@ -165,8 +167,9 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
   names(effect_hash) <- coef_df$dx
   calc_mortality_prediction <- function(dx){
     # dx is a character vector of diagnosis codes for one person
-    x <- min(effect_hash[sub("\\.", "", dx)], na.rm = TRUE)
-    x <- if_else( (x>1|x<0),NA,x )
+    # min() returns Inf or -Inf for empty set, with warnings, hence the following:
+    suppressWarnings(x <- min(effect_hash[sub("\\.", "", dx)], na.rm = TRUE))
+    x <- if_else( all(is.na(effect_hash[sub("\\.", "", dx)])),NA,x)
   }
   mat <- as.matrix(df[,grepl(paste0("^", dx_pre), names(df))])
   df$PS_iciss_min <- apply(mat, 1, calc_mortality_prediction)
@@ -181,7 +184,7 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
 
   message("=============================================")
   message("REMINDER")
-  message("ICDPICR Version 2.0.1 IS BEING TESTED")
+  message("ICDPICR Version 2.0.2 IS BEING TESTED")
   message("Major bugs and flaws may still exist")
   message("Please report issues to david.clark@tufts.edu")
   message("or at github/clark-david/icdpicr2/issues")
