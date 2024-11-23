@@ -39,7 +39,7 @@
 #'          \item PS_iciss_min: ICISS calculated as the minimum of DSP
 #'          }
 #'
-#' @details  Data should be in wide format, as in the following example:
+#' @details  Data should be in wide format, as in the example below
 #'
 #' @examples
 #' df_in <- read.table(header = TRUE, text = "
@@ -56,7 +56,7 @@
 
 iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
 
-  #Version 241118
+  #Version 241123
 
   require(dplyr)
   require(readr)

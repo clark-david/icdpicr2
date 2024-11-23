@@ -387,11 +387,6 @@ i10_map_mech<-distinct(etab)
 i10_map_mech<-mutate(i10_map_mech,version="v241120")
 write_csv(i10_map_mech,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_mech_241120.csv")
 
-i10_map_sev<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICD_AIS_241119.csv")
-i10_map_sev<-rename(i10_map_sev,dx=ICD,issbr=BR,severity=AIS)
-i10_map_sev<-mutate(i10_map_sev,version="v241120")
-write_csv(i10_map_sev,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_sev_241120.csv")
-
 i10_map_frame<-read_csv("/Users/davideugeneclark/Documents/icdpicr/ICD_Cells.csv")
 i10_map_frame<-rename(i10_map_frame,dx=ICD)
 i10_map_frame<-mutate(i10_map_frame,PsCell=1-PmCell)

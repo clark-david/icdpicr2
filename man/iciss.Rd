@@ -47,7 +47,7 @@ For each observation this function will
 }
 }
 \details{
-Data should be in wide format, as in the following example:
+Data should be in wide format, as in the example below
 }
 \examples{
 df_in <- read.table(header = TRUE, text = "

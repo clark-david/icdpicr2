@@ -19,7 +19,7 @@ library(icdpicr2)
 ```
 
 
-*Version 241122*
+*Version 241123*
 
 **===================================**\
 **REMINDER**\
@@ -141,7 +141,7 @@ Reads in user data in the specified format.  Assigns ICD-10 injury codes to a ce
 
 13. Clark DE, Ahmad S.  Estimating injury severity using the Barell matrix.  Inj Prev 2006; 12:111-116.
 
-14. Berecki_Gisolf J, Rezaei-Darzi E, Fernando DT, D’Elia A.  International Classification of Disease based Injury Severity Score (ICISS): a comparison of methodologies applied to linked data from New South Wales, Australia.  Inj Prev 2024; 0:1-8 ePub ahead of print.
+14. Berecki-Gisolf J, Rezaei-Darzi E, Fernando DT, D’Elia A.  International Classification of Disease based Injury Severity Score (ICISS): a comparison of methodologies applied to linked data from New South Wales, Australia.  Inj Prev 2024; 0:1-8 ePub ahead of print.
 
 
 

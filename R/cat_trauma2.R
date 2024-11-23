@@ -30,9 +30,9 @@
 #'          \item mxaisbr1-mxaisbr6: maximum AIS severity for each of the 6 ISS body regions
 #'          \item maxais: maximum AIS severity over all ISS body regions
 #'          \item riss: computed injury severity score
-#'          \item niss: new injury severity score
-#'          \item PmortTQP: The TQP model predicted probability of mortality
-#'          \item PmortNIS: The NIS model predicted probability of mortality
+#'          \item niss: computed "new injury severity score"
+#'          \item PmortTQP: TQP model predicted probability of mortality
+#'          \item PmortNIS: NIS model predicted probability of mortality
 #'          \item mechcode_1-mechcode_4: first 4 mechanism codes found in each row of data
 #'          \item mech_1-mech_4: CDC external cause of injury major mechanism for each mechanism code captured
 #'          \item intent_1-intent_4: intent for each mechanism code captured
@@ -46,7 +46,7 @@
 #'     31416   S32110A   S3251     NA
 #'     31417   S72141A   T07XXXA   D62
 #' ")
-#' df_out <- cat_trauma2(df_in, "dx", TRUE, FALSE)
+#' df_out <- cat_trauma2(df_in, "dx", TRUE)
 #'
 #' @importFrom stringr str_extract
 #' @importFrom stats na.omit
@@ -55,7 +55,7 @@
 
 cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
 
-  #Version 241115
+  #Version 241123
 
   require(dplyr)
   require(readr)

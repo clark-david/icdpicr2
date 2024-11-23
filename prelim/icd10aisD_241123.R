@@ -577,7 +577,20 @@ d6<-select(d6,ICD,AIS,BR,TQIPeffect,TQIPint,NISeffect,NISint)
 
 write_csv(d6,"ICDAIS_4.csv")
 
+
+
+
+
+
+
+
 ####################### FOLLOWING CODE MODIFIED NOVEMBER 2024 ###############################
+
+setwd("/Users/davideugeneclark/Documents/icdpicr2")  
+require(tidyverse)
+require(skimr)
+require(janitor)
+require(broom)
 
 
 #Get list of valid ICD-10 (international) codes 
@@ -586,7 +599,7 @@ write_csv(d6,"ICDAIS_4.csv")
 #  Adds a few WHO ICD-10 codes not in Gedeborg (S137,S577,S732,S737,S738) 
 #  Adds most frequent truncated ICD-10-CM codes not in Gedeborg
 #     (S123,S124,S125,S126,S138,S161,S209,S316,S402,S503,S605,S614,S802)
-#  Assins a DSP to added codes "borrowed" from a related ICD-10 code
+#  Assigns a DSP to added codes "borrowed" from a related ICD-10 code
 #  Assigns an ISS body region to all codes in list
 
 dged <- read_csv("/Users/davideugeneclark/Documents/icdpicr2/gedeborg_modified_241119.csv")
@@ -611,13 +624,15 @@ tabyl(dged,AIS,added)
 dged <- select(dged,ICD,AIS,BR,already_in,totaln,dsp)
 
 #Add resulting diagnosis codes to ICDAIS_4.csv
-d6 <- read_csv("/Users/davideugeneclark/Documents/icdpicr/ICDAIS_4.csv")
-d6 <- bind_rows(d6,dged)
-write_csv(d6,"/Users/davideugeneclark/Documents/icdpicr2/ICDAIS_5.csv")
+d4 <- read_csv("/Users/davideugeneclark/Documents/icdpicr/ICDAIS_4.csv")
+d5 <- bind_rows(d4,dged)
+write_csv(d5,"/Users/davideugeneclark/Documents/icdpicr2/ICDAIS_5.csv")
 
 #UPDATE VERSION AND FILENAMES
 #Unduplicate to create ICD_AIS.csv
 #Sort in such a way that information is used from Gedeborg if available
+#  Namely, a value of 0 or 1 for "already_in" (from "dged") 
+#     will sort ahead of NA (from "ICDAIS_4", which lacks this variable)
 d7<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICDAIS_5.csv")
 d7<-arrange(d7,ICD,already_in)
 d7<-group_by(d7,ICD)
@@ -626,7 +641,7 @@ d7<-ungroup(d7)
 d7<-filter(d7,seq==1)
 d7<-mutate(d7,version="v241119")
 d7<-select(d7,-seq,-already_in,-totaln,-dsp)
-write_csv(d7,"/Users/davideugeneclark/Documents/icdpicr2/ICD_AIS_241119.csv")
+write_csv(d7,"/Users/davideugeneclark/Documents/icdpicr2/ICD_AIS_241123.csv")
 
 #Unduplicate to create i10_map_iciss.csv
 d8<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICDAIS_5.csv")
@@ -647,8 +662,14 @@ d8<-mutate(d8,dsp_cons=if_else(totaln<5,1,dsp))
 d8<-select(d8,ICD,totaln,dsp,dsp_cons)
 d8<-rename(d8,dsp_noncons=dsp)
 d8<-rename(d8,dx=ICD)
-d8<-mutate(d8,version="v241119")
-write_csv(d8,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_iciss_241119.csv")
+d8<-mutate(d8,version="v241123")
+write_csv(d8,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_iciss_241123.csv")
+
+#Create i10_map_sev
+i10_map_sev<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICD_AIS_241123.csv")
+i10_map_sev<-rename(i10_map_sev,dx=ICD,issbr=BR,severity=AIS)
+i10_map_sev<-mutate(i10_map_sev,version="v241123")
+write_csv(i10_map_sev,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_sev_241123.csv")
 
 
         
