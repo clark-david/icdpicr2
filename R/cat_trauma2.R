@@ -59,6 +59,7 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
 
   require(dplyr)
   require(readr)
+  require(tidyr)
   starttime=Sys.time()
 
   # Verify input
