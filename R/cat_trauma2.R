@@ -55,7 +55,7 @@
 
 cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
 
-  #Version 241123
+  #Version 241125
 
   require(dplyr)
   require(readr)
@@ -81,8 +81,8 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
   # Make sure df is not a tibble and if it is convert back to regular dataframe
   df <- data.frame(df)
 
-  ntab <- i10_map_sev
-  ntab <- ntab[ , c("dx","severity","issbr")]
+  ntab <- i10_map_sev[ , c("dx","severity","issbr")]
+  rtab <- i10_map_sev[ , c("dx","TQIPeffect","TQIPint","NISeffect","NISint")]
 
   #---------------------------------------------------------------------------------#
   #  Merge diagnosis code variables with N-Code reference table to obtain severity  #
@@ -125,7 +125,7 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
     # Add temp columns to dataframe
     df <- .insert_columns(df, dx_name, temp)
 
-  }   #END FOR LOOP (i in dxno)
+  }   #END FOR LOOP (i in dxnums)
 
 
   #----------------------------------------------------#
@@ -253,46 +253,47 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
   if(messages==TRUE){
     mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
     message("Time elapsed ", mindiff, " minutes")
-    message("Calculating predicted mortality from TQP regression model")
+    message("Calculating predicted mortality from regression models")
   }
 
+  #--------------------------------------------------#
+  # Add mortality predictions from regression models #
+  #--------------------------------------------------#
 
-  #-------------------------------------------------#
-  # Add mortality prediction from regression models #
-  #-------------------------------------------------#
-  coef_df <- select(i10_map_sev,dx,TQIPeffect,TQIPint)
-  intercept <- max(coef_df$TQIPint,na.rm=TRUE)
-  # Create hash table
-  coef_df <- coef_df[!is.na(coef_df$TQIPeffect), ]
-  effect_hash <- coef_df$TQIPeffect
-  names(effect_hash) <- coef_df$dx
-  calc_mortality_prediction <- function(dx){
-    # dx is a character vector of diagnosis codes for one person
-    x <- sum(effect_hash[sub("\\.", "", dx)], na.rm = TRUE) + intercept
-    1/(1+exp(-x))
-  }
-  mat <- as.matrix(df[,grepl(paste0("^", dx_pre), names(df))])
-  df$PmortTQP <- apply(mat, 1, calc_mortality_prediction)
+  # Duplicate table of diagnoses and convert to long form
+  df <- mutate(df,RowID=row_number())
+  df_calc <- df
+  df_calc <- select(df_calc,RowID,starts_with(dx_pre))
+  df_calc <- pivot_longer(df_calc,cols=starts_with(dx_pre),names_to="ColName")
+  df_calc <- group_by(df_calc,RowID)
+  df_calc <- mutate(df_calc,ColID1=row_number())
+  df_calc <- ungroup(df_calc)
+  df_calc <- rename(df_calc,dx=value)
+  df_calc <- select(df_calc,-ColName)
+  # Strip out decimal in all codes, if present
+  df_calc <- mutate(df_calc,dx=str_replace(dx,"\\.",""))
 
-  if(messages==TRUE){
-    mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
-    message("Time elapsed ", mindiff, " minutes")
-    message("Calculating predicted mortality from NIS regression model")
-  }
+  # Merge tables and calculate regression prediction for each individual
+  df_merged <- left_join(df_calc,rtab,by="dx",relationship="many-to-many")
+  df_merged <- group_by(df_merged,RowID)
+  df_merged <- mutate(df_merged,all_na=all(is.na(TQIPeffect)))
+  df_merged <- mutate(df_merged,TQIPsum=sum(TQIPeffect,na.rm=TRUE))
+  df_merged <- mutate(df_merged,xTQP=TQIPsum+TQIPint)
+  df_merged <- mutate(df_merged,PmortTQP=(1/(1+exp(-xTQP))))
+  df_merged <- mutate(df_merged,NISsum=sum(NISeffect,na.rm=TRUE))
+  df_merged <- mutate(df_merged,xNIS=NISsum+NISint)
+  df_merged <- mutate(df_merged,PmortNIS=(1/(1+exp(-xNIS))))
+  df_merged <- ungroup(df_merged)
 
-  coef_df <- select(i10_map_sev,dx,NISeffect,NISint)
-  intercept <- max(coef_df$NISint,na.rm=TRUE)
-  # Create hash table
-  coef_df <- coef_df[!is.na(coef_df$NISeffect), ]
-  effect_hash <- coef_df$NISeffect
-  names(effect_hash) <- coef_df$dx
-  calc_mortality_prediction <- function(dx){
-    # dx is a character vector of diagnosis codes for one person
-    x <- sum(effect_hash[sub("\\.", "", dx)], na.rm = TRUE) + intercept
-    1/(1+exp(-x))
-  }
-  mat <- as.matrix(df[,grepl(paste0("^", dx_pre), names(df))])
-  df$PmortNIS <- apply(mat, 1, calc_mortality_prediction)
+  # Keep one set of results for each individual and add to original dataframe
+  df_results <- filter(df_merged,ColID1==1)
+  df_results <- select(df_results,RowID,PmortTQP,PmortNIS)
+  df_results <- rename(df_results,RowID2=RowID)
+  df_results <- arrange(df_results,RowID2)
+
+  df <- arrange(df,RowID)
+  df <- bind_cols(df,df_results)
+  df <- select(df,-starts_with("RowID"))
 
 
   #--------------------------------------------------#
@@ -321,7 +322,6 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
   df_mech <- select(df_mech,-ColName)
   # Strip out decimal in all codes, if present
   df_mech <- mutate(df_mech,dx=str_replace(dx,"\\.",""))
-
 
   # Merge tables and select first four "columns" with mechanism data
   df_merged <- left_join(df_mech,etab,by="dx",relationship="many-to-many")
@@ -353,7 +353,7 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
 
   message("=============================================")
   message("REMINDER")
-  message("ICDPICR Version 2.0.2 IS BEING TESTED")
+  message("ICDPICR Version 2.0.3 IS BEING TESTED")
   message("Major bugs and flaws may still exist")
   message("Please report issues to david.clark@tufts.edu")
   message("or at github/clark-david/icdpicr2/issues")
@@ -362,6 +362,6 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
   # Return dataframe
   df
 
-} #END FUNCTION
+} #END cat_trauma2
 
 

@@ -56,10 +56,12 @@
 
 iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
 
-  #Version 241123
+  #Version 241125
 
   require(dplyr)
   require(readr)
+  require(tidyr)
+  require(stringr)
   starttime=Sys.time()
 
   # Verify input
@@ -92,10 +94,10 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
   }
 
 
-  #------------------------------------------------------------------------------------#
-  #  Merge diagnosis code variables with reference table to obtain cell name           #
-  #  and cell survival probability for each diagnosis code and add them to the data    #
-  #------------------------------------------------------------------------------------#
+  #--------------------------------------------------------------------#
+  #  Merge diagnosis code variables with reference table to obtain DSP #
+  #     for each diagnosis code and add them to the data               #
+  #--------------------------------------------------------------------#
   for(i in dx_nums){
 
     if( (messages==TRUE) && (i%%5==0 || i==num_dx) ){
@@ -133,12 +135,12 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
     # Add temp columns to dataframe
     df <- .insert_columns(df, dx_name, temp)
 
-  }   #END FOR LOOP (i in dxno)
+  }   #END FOR LOOP (i in dxnums)
 
 
-  #----------------------------------------------------------#
-  # Add mortality prediction for ICD-10-cm codes from cells  #
-  #----------------------------------------------------------#
+  #-----------------------------------------------------------#
+  # Add survival predictions using product or minimum of DSP  #
+  #-----------------------------------------------------------#
 
   if(messages==TRUE){
     mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
@@ -146,37 +148,40 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
     message("Calculating survival predictions")
   }
 
-  coef_df <- select(itab,dx,dsp)
+  # Duplicate table of diagnoses and convert to long form
+  df <- mutate(df,RowID=row_number())
+  df_calc <- df
+  df_calc <- select(df_calc,RowID,starts_with("dsp"))
+  df_calc <- pivot_longer(df_calc,cols=starts_with("dsp"),names_to="ColName")
+  df_calc <- group_by(df_calc,RowID)
+  df_calc <- mutate(df_calc,ColID1=row_number())
+  df_calc <- ungroup(df_calc)
+  df_calc <- rename(df_calc,dsp=value)
+  df_calc <- select(df_calc,-ColName)
 
-  # Create hash table
-  coef_df <- coef_df[!is.na(coef_df$dsp), ]
-  effect_hash <- coef_df$dsp
-  names(effect_hash) <- coef_df$dx
-  calc_mortality_prediction <- function(dx){
-    # dx is a character vector of diagnosis codes for one person
-    # prod() returns 1 for empty set, hence the following:
-    x <- prod(effect_hash[sub("\\.", "", dx)], na.rm = TRUE)
-    x <- if_else( all(is.na(effect_hash[sub("\\.", "", dx)])),NA,x)
-  }
-  mat <- as.matrix(df[,grepl(paste0("^", dx_pre), names(df))])
-  df$PS_iciss_prod <- apply(mat, 1, calc_mortality_prediction)
+  # Calculate minimum and product for each individual
+  # Without modification, prod() returns 1 for empty set,
+  #    and min() returns Inf or -Inf for empty set, with warnings
+  # The following code returns NA if no diagnosis has a DSP from the lookup table
+  df_calc2 <- group_by(df_calc,RowID)
+  df_calc2 <- mutate(df_calc2,all_na=all(is.na(dsp)))
+  df_calc2 <- mutate(df_calc2,PS_iciss_prod=prod(dsp,na.rm=TRUE))
+  df_calc2 <- mutate(df_calc2,PS_iciss_prod=if_else(all_na==TRUE,NA,PS_iciss_prod))
+  df_calc2 <- suppressWarnings(mutate(df_calc2,PS_iciss_min=min(dsp,na.rm=TRUE)))
+  df_calc2 <- mutate(df_calc2,PS_iciss_min=if_else(all_na==TRUE,NA,PS_iciss_min))
+  df_calc2 <- ungroup(df_calc2)
 
-  # Create hash table
-  coef_df <- coef_df[!is.na(coef_df$dsp), ]
-  effect_hash <- coef_df$dsp
-  names(effect_hash) <- coef_df$dx
-  calc_mortality_prediction <- function(dx){
-    # dx is a character vector of diagnosis codes for one person
-    # min() returns Inf or -Inf for empty set, with warnings, hence the following:
-    suppressWarnings(x <- min(effect_hash[sub("\\.", "", dx)], na.rm = TRUE))
-    x <- if_else( all(is.na(effect_hash[sub("\\.", "", dx)])),NA,x)
-  }
-  mat <- as.matrix(df[,grepl(paste0("^", dx_pre), names(df))])
-  df$PS_iciss_min <- apply(mat, 1, calc_mortality_prediction)
+  # Keep one set of results for each individual and add to original dataframe
+  df_results <- filter(df_calc2,ColID1==1)
+  df_results <- select(df_results,RowID,PS_iciss_prod,PS_iciss_min)
+  df_results <- rename(df_results,RowID2=RowID)
+  df_results <- arrange(df_results,RowID2)
 
+  df <- select(df,-starts_with("totaln"))
+  df <- arrange(df,RowID)
+  df <- bind_cols(df,df_results)
+  df <- select(df,-starts_with("RowID"))
 
-  # Set rownames
-  rownames(df) <- 1:nrow(df)
   if(messages==TRUE){
     mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
     message("Time elapsed ", mindiff, " minutes")
@@ -184,12 +189,11 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
 
   message("=============================================")
   message("REMINDER")
-  message("ICDPICR Version 2.0.2 IS BEING TESTED")
+  message("ICDPICR Version 2.0.3 IS BEING TESTED")
   message("Major bugs and flaws may still exist")
   message("Please report issues to david.clark@tufts.edu")
   message("or at github/clark-david/icdpicr2/issues")
   message("==============================================")
-
 
   # Return dataframe
   df

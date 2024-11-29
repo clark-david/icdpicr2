@@ -1,5 +1,5 @@
 ---
-title: "implementation"
+title: "Implementation Details"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{implementation}
@@ -19,11 +19,12 @@ library(icdpicr2)
 ```
 
 
-*Version 241123*
+
+*Version 241127*
 
 **===================================**\
 **REMINDER**\
-**ICDPICR Version 2.0.2 IS BEING TESTED**\
+**ICDPICR Version 2.0.3 IS BEING TESTED**\
 **Major bugs and flaws may still exist**\
 **Please report issues to david.clark@tufts.edu**\
 **or at github/clark-david/icdpicr2/issues**\
@@ -58,11 +59,10 @@ Version 2 of “icdpicr”, named “icdpicr2”, is a further update in respons
 
 * Version 2 (“icdpicr2”) reports mechanism and intent categories following the most recent CDC publication.[11]  It adds the CDC framework for body area and nature of injury,[12] and calculates an approximate survival probability based on the empirical survival for each cell of the framework.[13]  It computes two versions (“multiplicative injury” and “worst injury”) of an “ICD-based Injury Severity Score” (ICISS).[8,14]   
 
-* Version 2 (“icdpicr2”) has also been simplified in several ways so that it will run faster than previous versions. In particular, the extraction of injury mechanism codes has been made much more efficient, which greatly reduces the most time-consuming step in Version 1.
+* Version 2 (“icdpicr2”) has also been modified in several ways so that it will run faster than previous versions, mostly by using more efficient methods of calculation.
 
 
 ### **The following programs were used to develop Version 2 (“icdpicr2”):**
-
 
 * **icd10aisA** – Reads in raw data from the 2020 TQP PUF or the 2020 NIS.  Identifies cases with a principal injury diagnosis specified by an ICD-10-CM code.  The National Trauma Data Standard used by TQP considers valid ICD-10-CM injury codes to be those in the ranges S00-S99, T07, T14, T20-T28, and T30-T32, so icd10aisA recognizes only these codes in the calculation of injury severity.  The program also requires that ICD-10-CM injury codes starting with the letter “S” conclude with the letter “A” (indicating an initial encounter), except for codes indicating a fracture, where codes concluding with the letters “B” or “C” indicate an initial encounter with an open fracture.
  
@@ -85,7 +85,7 @@ Version 2 of “icdpicr”, named “icdpicr2”, is a further update in respons
 * **icd10aisE** (New in Version 2) – Produces a table of injury mechanisms and intents based upon codes starting with T, V, W, X, or Y in ICD-10 data.[11]  Produces a table corresponding to the “Framework for Presenting Injury Data” developed by the CDC,[12] modeled after the “Barell Matrix” previously developed for ICD-9.  The TQP PUF and NIS survival for subjects with an ICD-10-CM diagnosis in each cell of the framework is also calculated, and the minimum cell survival for a given subject is provided as a rough estimate of severity.[13]
 
 
-Programs icd10aisA, icd10aisB, icd10aisC, icd10aisD, and icd10aisE, and a modification of the table published by Gedeborg and colleagues[8] can be found at https://github.com/clark-david/icdpicr2/prelim/.
+Programs icd10aisA, icd10aisB, icd10aisC, icd10aisD, and icd10aisE, and a modification of the data table published by Gedeborg and colleagues[8] can be found at https://github.com/clark-david/icdpicr2/prelim/.
 
 
 ### **The following tables are available in R after downloading “icdpicr2”:**
@@ -101,16 +101,27 @@ Programs icd10aisA, icd10aisB, icd10aisC, icd10aisD, and icd10aisE, and a modifi
 * **testdata:**  Sample data that can be used to demonstrate the functioning of the programs.
 
 
-### **The following functions are available in icdpicr2**
+### **The following functions are available in R after downloading “icdpicr2”:**
 
 * **Program “cat_trauma2”**
-Reads in user data in the specified format.  Calculates AIS, ISS, NISS, mortality predictions from the TQP and NIS models, and injury mechanisms.  Further details about the available options are provided in the help file for this function.
+Reads in user data in the specified format.  Returns AIS, ISS, NISS, mortality predictions from the TQP and NIS models, and injury mechanisms.  Further details about the available options are provided in the help file for this function.
 
 * **Program “iciss”**
-Reads in user data in the specified format.  Associates ICD-10 injury codes with one of the four-digit ICD-10 codes published by the WHO.   Calculates a predicted survival for each case.  Further details about the available options are provided in the help file for this function.
+Reads in user data in the specified format.  Returns two versions of the “ICD-based” Injury Severity Score (ICISS).  Further details about the available options are provided in the help file for this function.
 
 * **Program “framework”**
-Reads in user data in the specified format.  Assigns ICD-10 injury codes to a cell in the CDC “Framework for Presenting Injury Data”.[12]  Calculates a predicted survival for each case.  Further details about the available options are provided in the help file for this function.
+Reads in user data in the specified format.  Assigns each ICD-10 injury code to a cell in the CDC “Framework for Presenting Injury Data”.[12]  Returns a predicted survival for each case.  Further details about the available options are provided in the help file for this function.
+
+
+
+### **Updates 2.0.1 - 2.0.3**
+
+* Add some newer diagnosis codes to lookup tables (see icd10aisD and icd10aisE)
+
+* Reprogram functions to run faster (especially for large databases)
+
+* Update documentation
+
 
 
 ### **References**
@@ -157,6 +168,8 @@ Reads in user data in the specified format.  Assigns ICD-10 injury codes to a ce
 * Tables available in “icdpicr2”
 
 * Functions available in “icdpicr2”
+
+* Updates
 
 * References
 
