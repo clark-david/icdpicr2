@@ -3,14 +3,14 @@
 \docType{data}
 \name{i10_map_frame}
 \alias{i10_map_frame}
-\title{ICD10CM injury codes}
+\title{Table i10_map_frame}
 \format{
 A data frame with 20,499 rows and 5 variables:
 \describe{
   \item{dx}{A valid ICD-10 diagnosis code.}
   \item{cell}{The corresponding cell in the CDC Framework.}
   \item{PmCell}{The observed mortality for subjects with a diagnosis in this cell.}
-  \item{PmCell}{The observed survival for subjects with a diagnosis in this cell.}
+  \item{PsCell}{The observed survival for subjects with a diagnosis in this cell.}
   \item{version}{The most recent date when this dataset was revised.  Encoded vyymmdd.}
   ...
 }

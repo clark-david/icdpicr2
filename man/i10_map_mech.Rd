@@ -3,7 +3,7 @@
 \docType{data}
 \name{i10_map_mech}
 \alias{i10_map_mech}
-\title{ICD10CM injury codes}
+\title{Table i10_map_mech}
 \format{
 A data frame with 8,117 rows and 5 variables:
 \describe{

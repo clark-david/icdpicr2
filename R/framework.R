@@ -55,9 +55,7 @@ framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
   #Version 241211
 
   require(dplyr)
-  require(readr)
   require(tidyr)
-  require(stringr)
   starttime=Sys.time()
 
   # Verify input
@@ -153,7 +151,7 @@ framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
     # The following code returns NA if no diagnosis has a DSP in the lookup table
     df_calc2 <- dplyr::group_by(df_calc,RowID)
     df_calc2 <- dplyr::mutate(df_calc2,all_na=all(is.na(PsCell)))
-    df_calc2 <- suppressWarnings(mutate(df_calc2,PS_cell_min=min(PsCell,na.rm=TRUE)))
+    df_calc2 <- suppressWarnings(dplyr::mutate(df_calc2,PS_cell_min=min(PsCell,na.rm=TRUE)))
     df_calc2 <- dplyr::mutate(df_calc2,PS_cell_min=if_else(all_na==TRUE,NA,PS_cell_min))
     df_calc2 <- dplyr::ungroup(df_calc2)
 

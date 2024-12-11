@@ -3,7 +3,7 @@
 \docType{data}
 \name{i10_map_sev}
 \alias{i10_map_sev}
-\title{ICD10CM injury codes}
+\title{Table i10_map_sev}
 \format{
 A data frame with 20,551 rows and 8 variables:
 \describe{

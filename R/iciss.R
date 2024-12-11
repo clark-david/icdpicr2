@@ -58,9 +58,7 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
   #Version 241211
 
   require(dplyr)
-  require(readr)
   require(tidyr)
-  require(stringr)
   starttime=Sys.time()
 
   # Verify input
@@ -166,7 +164,7 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
   df_calc2 <- dplyr::mutate(df_calc2,all_na=all(is.na(dsp)))
   df_calc2 <- dplyr::mutate(df_calc2,PS_iciss_prod=prod(dsp,na.rm=TRUE))
   df_calc2 <- dplyr::mutate(df_calc2,PS_iciss_prod=if_else(all_na==TRUE,NA,PS_iciss_prod))
-  df_calc2 <- suppressWarnings(mutate(df_calc2,PS_iciss_min=min(dsp,na.rm=TRUE)))
+  df_calc2 <- suppressWarnings(dplyr::mutate(df_calc2,PS_iciss_min=min(dsp,na.rm=TRUE)))
   df_calc2 <- dplyr::mutate(df_calc2,PS_iciss_min=if_else(all_na==TRUE,NA,PS_iciss_min))
   df_calc2 <- dplyr::ungroup(df_calc2)
 
