@@ -46,14 +46,13 @@
 #' ")
 #' df_out <- framework(df_in, "dx", TRUE, FALSE)
 #'
-#' @importFrom stringr str_extract
 #' @importFrom stats na.omit
 #' @export
 
 
 framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
 
-  #Version 241125
+  #Version 241211
 
   require(dplyr)
   require(readr)
@@ -139,34 +138,34 @@ framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
     }
 
     # Duplicate table of diagnoses and convert to long form
-    df <- mutate(df,RowID=row_number())
+    df <- dplyr::mutate(df,RowID=row_number())
     df_calc <- df
-    df_calc <- select(df_calc,RowID,starts_with("PsCell"))
-    df_calc <- pivot_longer(df_calc,cols=starts_with("PsCell"),names_to="ColName")
-    df_calc <- group_by(df_calc,RowID)
-    df_calc <- mutate(df_calc,ColID1=row_number())
-    df_calc <- ungroup(df_calc)
-    df_calc <- rename(df_calc,PsCell=value)
-    df_calc <- select(df_calc,-ColName)
+    df_calc <- dplyr::select(df_calc,RowID,starts_with("PsCell"))
+    df_calc <- tidyr::pivot_longer(df_calc,cols=starts_with("PsCell"),names_to="ColName")
+    df_calc <- dplyr::group_by(df_calc,RowID)
+    df_calc <- dplyr::mutate(df_calc,ColID1=row_number())
+    df_calc <- dplyr::ungroup(df_calc)
+    df_calc <- dplyr::rename(df_calc,PsCell=value)
+    df_calc <- dplyr::select(df_calc,-ColName)
 
     # Calculate minimum DSP for each individual
     # Without modification, min() returns Inf or -Inf for empty set, with warnings
     # The following code returns NA if no diagnosis has a DSP in the lookup table
-    df_calc2 <- group_by(df_calc,RowID)
-    df_calc2 <- mutate(df_calc2,all_na=all(is.na(PsCell)))
+    df_calc2 <- dplyr::group_by(df_calc,RowID)
+    df_calc2 <- dplyr::mutate(df_calc2,all_na=all(is.na(PsCell)))
     df_calc2 <- suppressWarnings(mutate(df_calc2,PS_cell_min=min(PsCell,na.rm=TRUE)))
-    df_calc2 <- mutate(df_calc2,PS_cell_min=if_else(all_na==TRUE,NA,PS_cell_min))
-    df_calc2 <- ungroup(df_calc2)
+    df_calc2 <- dplyr::mutate(df_calc2,PS_cell_min=if_else(all_na==TRUE,NA,PS_cell_min))
+    df_calc2 <- dplyr::ungroup(df_calc2)
 
     # Keep one set of results for each individual and add to original dataframe
-    df_results <- filter(df_calc2,ColID1==1)
-    df_results <- select(df_results,RowID,PS_cell_min)
-    df_results <- rename(df_results,RowID2=RowID)
-    df_results <- arrange(df_results,RowID2)
+    df_results <- dplyr::filter(df_calc2,ColID1==1)
+    df_results <- dplyr::select(df_results,RowID,PS_cell_min)
+    df_results <- dplyr::rename(df_results,RowID2=RowID)
+    df_results <- dplyr::arrange(df_results,RowID2)
 
-    df <- arrange(df,RowID)
-    df <- bind_cols(df,df_results)
-    df <- select(df,-starts_with("RowID"))
+    df <- dplyr::arrange(df,RowID)
+    df <- dplyr::bind_cols(df,df_results)
+    df <- dplyr::select(df,-starts_with("RowID"))
 
   } #END if severity==TRUE
 
@@ -180,7 +179,7 @@ framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
 
   message("=============================================")
   message("REMINDER")
-  message("ICDPICR Version 2.0.3 IS BEING TESTED")
+  message("ICDPICR Version 2.0.4 IS BEING TESTED")
   message("Major bugs and flaws may still exist")
   message("Please report issues to david.clark@tufts.edu")
   message("or at github/clark-david/icdpicr2/issues")

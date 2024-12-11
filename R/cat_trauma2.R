@@ -48,14 +48,13 @@
 #' ")
 #' df_out <- cat_trauma2(df_in, "dx", TRUE)
 #'
-#' @importFrom stringr str_extract
 #' @importFrom stats na.omit
 #' @export
 
 
 cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
 
-  #Version 241125
+  #Version 241211
 
   require(dplyr)
   require(readr)
@@ -261,39 +260,39 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
   #--------------------------------------------------#
 
   # Duplicate table of diagnoses and convert to long form
-  df <- mutate(df,RowID=row_number())
+  df <- dplyr::mutate(df,RowID=row_number())
   df_calc <- df
-  df_calc <- select(df_calc,RowID,starts_with(dx_pre))
-  df_calc <- pivot_longer(df_calc,cols=starts_with(dx_pre),names_to="ColName")
-  df_calc <- group_by(df_calc,RowID)
-  df_calc <- mutate(df_calc,ColID1=row_number())
-  df_calc <- ungroup(df_calc)
-  df_calc <- rename(df_calc,dx=value)
-  df_calc <- select(df_calc,-ColName)
+  df_calc <- dplyr::select(df_calc,RowID,starts_with(dx_pre))
+  df_calc <- tidyr::pivot_longer(df_calc,cols=starts_with(dx_pre),names_to="ColName")
+  df_calc <- dplyr::group_by(df_calc,RowID)
+  df_calc <- dplyr::mutate(df_calc,ColID1=row_number())
+  df_calc <- dplyr::ungroup(df_calc)
+  df_calc <- dplyr::rename(df_calc,dx=value)
+  df_calc <- dplyr::select(df_calc,-ColName)
   # Strip out decimal in all codes, if present
-  df_calc <- mutate(df_calc,dx=str_replace(dx,"\\.",""))
+  df_calc <- dplyr::mutate(df_calc,dx=str_replace(dx,"\\.",""))
 
   # Merge tables and calculate regression prediction for each individual
-  df_merged <- left_join(df_calc,rtab,by="dx",relationship="many-to-many")
-  df_merged <- group_by(df_merged,RowID)
-  df_merged <- mutate(df_merged,all_na=all(is.na(TQIPeffect)))
-  df_merged <- mutate(df_merged,TQIPsum=sum(TQIPeffect,na.rm=TRUE))
-  df_merged <- mutate(df_merged,xTQP=TQIPsum+TQIPint)
-  df_merged <- mutate(df_merged,PmortTQP=(1/(1+exp(-xTQP))))
-  df_merged <- mutate(df_merged,NISsum=sum(NISeffect,na.rm=TRUE))
-  df_merged <- mutate(df_merged,xNIS=NISsum+NISint)
-  df_merged <- mutate(df_merged,PmortNIS=(1/(1+exp(-xNIS))))
-  df_merged <- ungroup(df_merged)
+  df_merged <- dplyr::left_join(df_calc,rtab,by="dx",relationship="many-to-many")
+  df_merged <- dplyr::group_by(df_merged,RowID)
+  df_merged <- dplyr::mutate(df_merged,all_na=all(is.na(TQIPeffect)))
+  df_merged <- dplyr::mutate(df_merged,TQIPsum=sum(TQIPeffect,na.rm=TRUE))
+  df_merged <- dplyr::mutate(df_merged,xTQP=TQIPsum+TQIPint)
+  df_merged <- dplyr::mutate(df_merged,PmortTQP=(1/(1+exp(-xTQP))))
+  df_merged <- dplyr::mutate(df_merged,NISsum=sum(NISeffect,na.rm=TRUE))
+  df_merged <- dplyr::mutate(df_merged,xNIS=NISsum+NISint)
+  df_merged <- dplyr::mutate(df_merged,PmortNIS=(1/(1+exp(-xNIS))))
+  df_merged <- dplyr::ungroup(df_merged)
 
   # Keep one set of results for each individual and add to original dataframe
-  df_results <- filter(df_merged,ColID1==1)
-  df_results <- select(df_results,RowID,PmortTQP,PmortNIS)
-  df_results <- rename(df_results,RowID2=RowID)
-  df_results <- arrange(df_results,RowID2)
+  df_results <- dplyr::filter(df_merged,ColID1==1)
+  df_results <- dplyr::select(df_results,RowID,PmortTQP,PmortNIS)
+  df_results <- dplyr::rename(df_results,RowID2=RowID)
+  df_results <- dplyr::arrange(df_results,RowID2)
 
-  df <- arrange(df,RowID)
-  df <- bind_cols(df,df_results)
-  df <- select(df,-starts_with("RowID"))
+  df <- dplyr::arrange(df,RowID)
+  df <- dplyr::bind_cols(df,df_results)
+  df <- dplyr::select(df,-starts_with("RowID"))
 
 
   #--------------------------------------------------#
@@ -312,35 +311,35 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
 
   # Duplicate table of diagnoses and convert to long form
   df_mech <- df
-  df_mech <- mutate(df_mech,RowID=row_number())
-  df_mech <- select(df_mech,RowID,starts_with(dx_pre))
-  df_mech <- pivot_longer(df_mech,cols=starts_with(dx_pre),names_to="ColName")
-  df_mech <- group_by(df_mech,RowID)
-  df_mech <- mutate(df_mech,ColID1=row_number())
-  df_mech <- ungroup(df_mech)
-  df_mech <- rename(df_mech,dx=value)
-  df_mech <- select(df_mech,-ColName)
+  df_mech <- dplyr::mutate(df_mech,RowID=row_number())
+  df_mech <- dplyr::select(df_mech,RowID,starts_with(dx_pre))
+  df_mech <- tidyr::pivot_longer(df_mech,cols=starts_with(dx_pre),names_to="ColName")
+  df_mech <- dplyr::group_by(df_mech,RowID)
+  df_mech <- dplyr::mutate(df_mech,ColID1=row_number())
+  df_mech <- dplyr::ungroup(df_mech)
+  df_mech <- dplyr::rename(df_mech,dx=value)
+  df_mech <- dplyr::select(df_mech,-ColName)
   # Strip out decimal in all codes, if present
-  df_mech <- mutate(df_mech,dx=str_replace(dx,"\\.",""))
+  df_mech <- dplyr::mutate(df_mech,dx=str_replace(dx,"\\.",""))
 
   # Merge tables and select first four "columns" with mechanism data
-  df_merged <- left_join(df_mech,etab,by="dx",relationship="many-to-many")
-  df_merged <- mutate(df_merged,ColID1=if_else(is.na(mechmaj),99,ColID1))
-  df_merged <- group_by(df_merged,RowID)
-  df_merged <- arrange(df_merged,ColID1)
-  df_merged <- mutate(df_merged,ColID2=row_number())
-  df_merged <- ungroup(df_merged)
-  df_merged <- filter(df_merged,ColID2<=4)
-  df_merged <- mutate(df_merged,dx=if_else(is.na(mechmaj),NA,dx))
-  df_merged <- select(df_merged,-ColID1)
-  df_merged <- rename(df_merged,mechcode=dx,mech=mechmaj)
+  df_merged <- dplyr::left_join(df_mech,etab,by="dx",relationship="many-to-many")
+  df_merged <- dplyr::mutate(df_merged,ColID1=if_else(is.na(mechmaj),99,ColID1))
+  df_merged <- dplyr::group_by(df_merged,RowID)
+  df_merged <- dplyr::arrange(df_merged,ColID1)
+  df_merged <- dplyr::mutate(df_merged,ColID2=row_number())
+  df_merged <- dplyr::ungroup(df_merged)
+  df_merged <- dplyr::filter(df_merged,ColID2<=4)
+  df_merged <- dplyr::mutate(df_merged,dx=if_else(is.na(mechmaj),NA,dx))
+  df_merged <- dplyr::select(df_merged,-ColID1)
+  df_merged <- dplyr::rename(df_merged,mechcode=dx,mech=mechmaj)
 
   # Convert back to wide form and merge with original dataframe
-  df_merged_wide <- pivot_wider(df_merged,id_cols=RowID,values_from=c(mechcode,mech,intent),
-                                names_from=ColID2)
-  df_merged_wide <- arrange(df_merged_wide,RowID)
-  df_merged_wide <- select(df_merged_wide,-RowID)
-  df <- bind_cols(df,df_merged_wide)
+  df_merged_wide <- tidyr::pivot_wider(df_merged,id_cols=RowID,values_from=c(mechcode,mech,intent),
+                                       names_from=ColID2)
+  df_merged_wide <- dplyr::arrange(df_merged_wide,RowID)
+  df_merged_wide <- dplyr::select(df_merged_wide,-RowID)
+  df <- dplyr::bind_cols(df,df_merged_wide)
 
 
   if(messages==TRUE){
@@ -353,7 +352,7 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
 
   message("=============================================")
   message("REMINDER")
-  message("ICDPICR Version 2.0.3 IS BEING TESTED")
+  message("ICDPICR Version 2.0.4 IS BEING TESTED")
   message("Major bugs and flaws may still exist")
   message("Please report issues to david.clark@tufts.edu")
   message("or at github/clark-david/icdpicr2/issues")

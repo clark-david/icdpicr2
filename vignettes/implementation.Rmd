@@ -19,12 +19,11 @@ library(icdpicr2)
 ```
 
 
-
-*Version 241127*
+*Version 241211*
 
 **===================================**\
 **REMINDER**\
-**ICDPICR Version 2.0.3 IS BEING TESTED**\
+**ICDPICR Version 2.0.4 IS BEING TESTED**\
 **Major bugs and flaws may still exist**\
 **Please report issues to david.clark@tufts.edu**\
 **or at github/clark-david/icdpicr2/issues**\
@@ -114,7 +113,7 @@ Reads in user data in the specified format.  Assigns each ICD-10 injury code to 
 
 
 
-### **Updates 2.0.1 - 2.0.3**
+### **Updates 2.0.1 - 2.0.4**
 
 * Add some newer diagnosis codes to lookup tables (see icd10aisD and icd10aisE)
 
