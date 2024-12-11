@@ -3,7 +3,7 @@
 \docType{data}
 \name{testdata}
 \alias{testdata}
-\title{ICD10CM injury codes}
+\title{Test Data}
 \format{
 A data frame with 20,000 rows and 13 variables:
 \describe{
@@ -19,16 +19,6 @@ A data frame with 20,000 rows and 13 variables:
   \item{I10_DX8}{8th ICD-10-CM injury code recorded on an encounter.}
   \item{I10_DX9}{9th ICD-10-CM injury code recorded on an encounter.}
   \item{I10_DX10}{10th ICD-10-CM injury code recorded on an encounter.}
-  \item{I10_DX11}{11th ICD-10-CM injury code recorded on an encounter.}
-  \item{I10_DX12}{12th ICD-10-CM injury code recorded on an encounter.}
-  \item{I10_DX13}{13th ICD-10-CM injury code recorded on an encounter.}
-  \item{I10_DX14}{14th ICD-10-CM injury code recorded on an encounter.}
-  \item{I10_DX15}{15th ICD-10-CM injury code recorded on an encounter.}
-  \item{I10_DX16}{16th ICD-10-CM injury code recorded on an encounter.}
-  \item{I10_DX17}{17th ICD-10-CM injury code recorded on an encounter.}
-  \item{I10_DX18}{18th ICD-10-CM injury code recorded on an encounter.}
-  \item{I10_DX19}{19th ICD-10-CM injury code recorded on an encounter.}
-  \item{I10_DX20}{20th ICD-10-CM injury code recorded on an encounter.}
   \item{Version}{The most recent date when this dataset was revised. Encoded vyymmdd.}
   ...
 }
