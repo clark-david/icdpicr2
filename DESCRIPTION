@@ -7,7 +7,7 @@ Maintainer: David Clark <david.clark@tufts.edu>
 Description: Functions read a dataframe containing one or more ICD-10 codes per subject.
     They return original data with injury categorizations and severity scores added.
     See "Implementation Details" vignette.  If this vignette is not with help files,
-       reinstall with install_github("clark-david/icdpicr2",build_vignettes=TRUE)
+       reinstall with install_github("clark-david/icdpicr2",build_vignettes=TRUE).
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
