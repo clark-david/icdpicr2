@@ -97,6 +97,7 @@
 #'   \item{I10_DX18}{18th ICD-10-CM injury code recorded on an encounter.}
 #'   \item{I10_DX19}{19th ICD-10-CM injury code recorded on an encounter.}
 #'   \item{I10_DX20}{20th ICD-10-CM injury code recorded on an encounter.}
+#'   \item{Version}{The most recent date when this dataset was revised. Encoded vyymmdd.}
 #'   ...
 #' }
 "testdata"

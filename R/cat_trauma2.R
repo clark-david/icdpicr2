@@ -312,7 +312,7 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
   df_mech <- df
   df_mech <- dplyr::mutate(df_mech,RowID=row_number())
   df_mech <- dplyr::select(df_mech,RowID,starts_with(dx_pre))
-  df_mech <- tidyr::pivot_longer(df_mech,cols=stringr::starts_with(dx_pre),names_to="ColName")
+  df_mech <- tidyr::pivot_longer(df_mech,cols=starts_with(dx_pre),names_to="ColName")
   df_mech <- dplyr::group_by(df_mech,RowID)
   df_mech <- dplyr::mutate(df_mech,ColID1=row_number())
   df_mech <- dplyr::ungroup(df_mech)
