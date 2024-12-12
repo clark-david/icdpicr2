@@ -54,11 +54,8 @@
 
 cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
 
-  #Version 241211
+  #Version 241212
 
-  require(dplyr)
-  require(tidyr)
-  require(stringr)
   starttime=Sys.time()
 
   # Verify input
@@ -259,17 +256,17 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
   #--------------------------------------------------#
 
   # Duplicate table of diagnoses and convert to long form
-  df <- dplyr::mutate(df,RowID=row_number())
+  df <- dplyr::mutate(df,RowID=dplyr::row_number())
   df_calc <- df
   df_calc <- dplyr::select(df_calc,RowID,starts_with(dx_pre))
   df_calc <- tidyr::pivot_longer(df_calc,cols=starts_with(dx_pre),names_to="ColName")
   df_calc <- dplyr::group_by(df_calc,RowID)
-  df_calc <- dplyr::mutate(df_calc,ColID1=row_number())
+  df_calc <- dplyr::mutate(df_calc,ColID1=dplyr::row_number())
   df_calc <- dplyr::ungroup(df_calc)
   df_calc <- dplyr::rename(df_calc,dx=value)
   df_calc <- dplyr::select(df_calc,-ColName)
   # Strip out decimal in all codes, if present
-  df_calc <- dplyr::mutate(df_calc,dx=str_replace(dx,"\\.",""))
+  df_calc <- dplyr::mutate(df_calc,dx=stringr::str_replace(dx,"\\.",""))
 
   # Merge tables and calculate regression prediction for each individual
   df_merged <- dplyr::left_join(df_calc,rtab,by="dx",relationship="many-to-many")
@@ -310,11 +307,11 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
 
   # Duplicate table of diagnoses and convert to long form
   df_mech <- df
-  df_mech <- dplyr::mutate(df_mech,RowID=row_number())
+  df_mech <- dplyr::mutate(df_mech,RowID=dplyr::row_number())
   df_mech <- dplyr::select(df_mech,RowID,starts_with(dx_pre))
   df_mech <- tidyr::pivot_longer(df_mech,cols=starts_with(dx_pre),names_to="ColName")
   df_mech <- dplyr::group_by(df_mech,RowID)
-  df_mech <- dplyr::mutate(df_mech,ColID1=row_number())
+  df_mech <- dplyr::mutate(df_mech,ColID1=dplyr::row_number())
   df_mech <- dplyr::ungroup(df_mech)
   df_mech <- dplyr::rename(df_mech,dx=value)
   df_mech <- dplyr::select(df_mech,-ColName)
@@ -323,13 +320,13 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
 
   # Merge tables and select first four "columns" with mechanism data
   df_merged <- dplyr::left_join(df_mech,etab,by="dx",relationship="many-to-many")
-  df_merged <- dplyr::mutate(df_merged,ColID1=if_else(is.na(mechmaj),99,ColID1))
+  df_merged <- dplyr::mutate(df_merged,ColID1=dplyr::if_else(is.na(mechmaj),99,ColID1))
   df_merged <- dplyr::group_by(df_merged,RowID)
   df_merged <- dplyr::arrange(df_merged,ColID1)
-  df_merged <- dplyr::mutate(df_merged,ColID2=row_number())
+  df_merged <- dplyr::mutate(df_merged,ColID2=dplyr::row_number())
   df_merged <- dplyr::ungroup(df_merged)
   df_merged <- dplyr::filter(df_merged,ColID2<=4)
-  df_merged <- dplyr::mutate(df_merged,dx=if_else(is.na(mechmaj),NA,dx))
+  df_merged <- dplyr::mutate(df_merged,dx=dplyr::if_else(is.na(mechmaj),NA,dx))
   df_merged <- dplyr::select(df_merged,-ColID1)
   df_merged <- dplyr::rename(df_merged,mechcode=dx,mech=mechmaj)
 

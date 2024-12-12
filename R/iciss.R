@@ -55,10 +55,8 @@
 
 iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
 
-  #Version 241211
+  #Version 241212
 
-  require(dplyr)
-  require(tidyr)
   starttime=Sys.time()
 
   # Verify input
@@ -146,12 +144,12 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
   }
 
   # Duplicate table of diagnoses and convert to long form
-  df <- dplyr::mutate(df,RowID=row_number())
+  df <- dplyr::mutate(df,RowID=dplyr::row_number())
   df_calc <- df
   df_calc <- dplyr::select(df_calc,RowID,starts_with("dsp"))
   df_calc <- tidyr::pivot_longer(df_calc,cols=starts_with("dsp"),names_to="ColName")
   df_calc <- dplyr::group_by(df_calc,RowID)
-  df_calc <- dplyr::mutate(df_calc,ColID1=row_number())
+  df_calc <- dplyr::mutate(df_calc,ColID1=dplyr::row_number())
   df_calc <- dplyr::ungroup(df_calc)
   df_calc <- dplyr::rename(df_calc,dsp=value)
   df_calc <- dplyr::select(df_calc,-ColName)
@@ -163,9 +161,9 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
   df_calc2 <- dplyr::group_by(df_calc,RowID)
   df_calc2 <- dplyr::mutate(df_calc2,all_na=all(is.na(dsp)))
   df_calc2 <- dplyr::mutate(df_calc2,PS_iciss_prod=prod(dsp,na.rm=TRUE))
-  df_calc2 <- dplyr::mutate(df_calc2,PS_iciss_prod=if_else(all_na==TRUE,NA,PS_iciss_prod))
+  df_calc2 <- dplyr::mutate(df_calc2,PS_iciss_prod=dplyr::if_else(all_na==TRUE,NA,PS_iciss_prod))
   df_calc2 <- suppressWarnings(dplyr::mutate(df_calc2,PS_iciss_min=min(dsp,na.rm=TRUE)))
-  df_calc2 <- dplyr::mutate(df_calc2,PS_iciss_min=if_else(all_na==TRUE,NA,PS_iciss_min))
+  df_calc2 <- dplyr::mutate(df_calc2,PS_iciss_min=dplyr::if_else(all_na==TRUE,NA,PS_iciss_min))
   df_calc2 <- dplyr::ungroup(df_calc2)
 
   # Keep one set of results for each individual and add to original dataframe

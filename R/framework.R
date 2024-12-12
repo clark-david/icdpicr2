@@ -52,10 +52,8 @@
 
 framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
 
-  #Version 241211
+  #Version 241212
 
-  require(dplyr)
-  require(tidyr)
   starttime=Sys.time()
 
   # Verify input
@@ -136,12 +134,12 @@ framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
     }
 
     # Duplicate table of diagnoses and convert to long form
-    df <- dplyr::mutate(df,RowID=row_number())
+    df <- dplyr::mutate(df,RowID=dplyr::row_number())
     df_calc <- df
     df_calc <- dplyr::select(df_calc,RowID,starts_with("PsCell"))
     df_calc <- tidyr::pivot_longer(df_calc,cols=starts_with("PsCell"),names_to="ColName")
     df_calc <- dplyr::group_by(df_calc,RowID)
-    df_calc <- dplyr::mutate(df_calc,ColID1=row_number())
+    df_calc <- dplyr::mutate(df_calc,ColID1=dplyr::row_number())
     df_calc <- dplyr::ungroup(df_calc)
     df_calc <- dplyr::rename(df_calc,PsCell=value)
     df_calc <- dplyr::select(df_calc,-ColName)
@@ -152,7 +150,7 @@ framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
     df_calc2 <- dplyr::group_by(df_calc,RowID)
     df_calc2 <- dplyr::mutate(df_calc2,all_na=all(is.na(PsCell)))
     df_calc2 <- suppressWarnings(dplyr::mutate(df_calc2,PS_cell_min=min(PsCell,na.rm=TRUE)))
-    df_calc2 <- dplyr::mutate(df_calc2,PS_cell_min=if_else(all_na==TRUE,NA,PS_cell_min))
+    df_calc2 <- dplyr::mutate(df_calc2,PS_cell_min=dplyr::if_else(all_na==TRUE,NA,PS_cell_min))
     df_calc2 <- dplyr::ungroup(df_calc2)
 
     # Keep one set of results for each individual and add to original dataframe
