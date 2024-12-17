@@ -1,4 +1,4 @@
-utils::globalVariables(c("ColID1","ColID2","ColName","NISeffect","NISint","NISsum",
+utils::globalVariables(c("ColID1","ColID2","ColName","NISeffect","NISint","NISsum","PsCell",
                          "PS_cell_min","PS_iciss_min","PS_iciss_prod","PmortNIS","PmortTQP","PScell",
                          "RowID","RowID2","TQIPeffect","TQIPint","TQIPsum","all_na",
                          "dsp","dsp_cons","dsp_noncons","dx",

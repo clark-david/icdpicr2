@@ -52,7 +52,7 @@
 
 framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
 
-  #Version 241212
+  #Version 241216
 
   starttime=Sys.time()
 
@@ -136,8 +136,8 @@ framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
     # Duplicate table of diagnoses and convert to long form
     df <- dplyr::mutate(df,RowID=dplyr::row_number())
     df_calc <- df
-    df_calc <- dplyr::select(df_calc,RowID,starts_with("PsCell"))
-    df_calc <- tidyr::pivot_longer(df_calc,cols=starts_with("PsCell"),names_to="ColName")
+    df_calc <- dplyr::select(df_calc,RowID,dplyr::starts_with("PsCell"))
+    df_calc <- tidyr::pivot_longer(df_calc,cols=tidyr::starts_with("PsCell"),names_to="ColName")
     df_calc <- dplyr::group_by(df_calc,RowID)
     df_calc <- dplyr::mutate(df_calc,ColID1=dplyr::row_number())
     df_calc <- dplyr::ungroup(df_calc)
@@ -161,7 +161,7 @@ framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
 
     df <- dplyr::arrange(df,RowID)
     df <- dplyr::bind_cols(df,df_results)
-    df <- dplyr::select(df,-starts_with("RowID"))
+    df <- dplyr::select(df,-dplyr::starts_with("RowID"))
 
   } #END if severity==TRUE
 
