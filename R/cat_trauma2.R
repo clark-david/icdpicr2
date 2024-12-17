@@ -258,7 +258,7 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
   # Duplicate table of diagnoses and convert to long form
   df <- dplyr::mutate(df,RowID=dplyr::row_number())
   df_calc <- df
-  df_calc <- dplyr::select(df_calc,RowID,starts_with(dx_pre))
+  df_calc <- dplyr::select(df_calc,RowID,dplyr::starts_with(dx_pre))
   df_calc <- tidyr::pivot_longer(df_calc,cols=tidyr::starts_with(dx_pre),names_to="ColName")
   df_calc <- dplyr::group_by(df_calc,RowID)
   df_calc <- dplyr::mutate(df_calc,ColID1=dplyr::row_number())
