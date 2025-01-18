@@ -14,26 +14,11 @@ A data frame with 8,117 rows and 5 variables:
   \item{version}{The most recent date when this dataset was revised.  Encoded vyymmdd.}
   ...
 }
-
-A data frame with 8,117 rows and 5 variables:
-\describe{
-  \item{dx}{A valid ICD-10 diagnosis code.}
-  \item{mechmaj}{The CDC major mechanism category.}
-  \item{intent}{The CDC intent category.}
-  \item{mechmin}{The CDC minor mechanism category, if any.}
-  \item{version}{The most recent date when this dataset was revised.  Encoded vyymmdd.}
-  ...
-}
 }
 \usage{
 i10_map_mech
-
-i10_map_mech
 }
 \description{
-A dataset containing ICD-10 diagnosis codes and their properties
-for determination of injury mechanism.
-
 A dataset containing ICD-10 diagnosis codes and their properties
 for determination of injury mechanism.
 }

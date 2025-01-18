@@ -5,16 +5,6 @@
 \alias{i10_map_iciss}
 \title{Table i10_map_iciss}
 \format{
-A data frame with 20,551 rows and 5 variables:
-\describe{
-  \item{dx}{A valid ICD-10 diagnosis code.}
-  \item{totaln}{The number of cases from which the observed survival was calculated.}
-  \item{dsp_noncons}{The observed survival for subjects with this diagnosis.}
-  \item{dsp_cons}{Same as above, but NA if totaln < 5.}
-  \item{version}{The most recent date when this dataset was revised.  Encoded vyymmdd.}
-  ...
-}
-
 A data frame with 20,551 rows and 12 variables:
 \describe{
   \item{dx}{A valid ICD-10 diagnosis code.}
@@ -34,13 +24,8 @@ A data frame with 20,551 rows and 12 variables:
 }
 \usage{
 i10_map_iciss
-
-i10_map_iciss
 }
 \description{
-A dataset containing ICD-10 diagnosis codes and their properties
-for calculation of ICD Injury Severity Score (ICISS).
-
 A dataset containing ICD-10 diagnosis codes and their properties
 for calculation of several versions of the ICD Injury Severity Score (ICISS).
 }
