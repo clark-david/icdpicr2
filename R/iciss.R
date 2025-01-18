@@ -1,15 +1,16 @@
 
 #' Compute International Classification of Diseases-Based Injury Severity Score (ICISS)
 #'
-#' This function adds Diagnosis-specific Survival Probabilities (DSP) to a dataframe, based on the table
-#'    provided by Gedeborg and colleagues (J Trauma Acute Care Surgery 2014).  Codes longer than four digits
-#'    are treated as if they were four-digit ICD-10 codes as published by the World Health Organization.
+#' This function adds Diagnosis-specific Survival Probabilities (DSP) to a dataframe, based on the table provided by
+#'    Gedeborg and colleagues (J Trauma Acute Care Surgery 2014) and also TQP and NIS.  ICD-10-CM codes longer than
+#'    four digits are treated as if they were four-digit ICD-10 codes as published by the World Health Organization.
 #'    Thus, an ICD-10-CM code like S00552A is considered the same as S005.
 #' For each observation this function will
 #' \enumerate{
 #'    \item assign a severity (DSP) to each valid ICD-10 injury diagnosis code,
 #'    \item calculate one version of ICISS as the product of these DSP, and
 #'    \item calculate another version of ICISS as the minimum of these DSP.
+#'    \item It repeats the above using international data, TQP, and NIS as reference data.
 #'}
 #'
 #'
@@ -33,10 +34,15 @@
 #' @return A dataframe identical to the dataframe passed to the function with the following additional variables
 #'          added:
 #'          \itemize{
-#'          \item DSP_1-DSP_n: DSP for diagnosis codes 1..n
-#'          \item totaln_1-totaln_n: Number of cases from which DSP was calculated for diagnosis codes 1..n
-#'          \item PS_iciss_prod: ICISS calculated as the product of DSP
-#'          \item PS_iciss_min: ICISS calculated as the minimum of DSP
+#'          \item dsp_int1-dsp_intn: DSP for diagnosis codes 1..n, from international data
+#'          \item dsp_TQP1-dsp_TQPn: DSP for diagnosis codes 1..n, from TQP data
+#'          \item dsp_TQP1-dsp_NISn: DSP for diagnosis codes 1..n, from NIS data
+#'          \item PS_int_prod: ICISS calculated as the product of dsp_int1-dsp_intn
+#'          \item PS_int_min: ICISS calculated as the minimum of dsp_int1-dsp_intn
+#'          \item PS_TQP_prod: ICISS calculated as the product of dsp_TQP1-dsp_TQPn
+#'          \item PS_TQP_min: ICISS calculated as the minimum of dsp_TQP1-dsp_TQPn
+#'          \item PS_NIS_prod: ICISS calculated as the product of dsp_NIS1-dsp_NISn
+#'          \item PS_NIS_min: ICISS calculated as the minimum of dsp_NIS1-dsp_NISn
 #'          }
 #'
 #' @details  Data should be in wide format, as in the example below
@@ -55,7 +61,7 @@
 
 iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
 
-  #Version 241216
+  #Version 250111
 
   starttime=Sys.time()
 
@@ -80,12 +86,11 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
   itab <- i10_map_iciss
 
   if(conservative==TRUE) {
-    itab <- itab[ , c("dx","totaln","dsp_cons")]
-    itab <- dplyr::rename(itab,dsp=dsp_cons)
+    itab <- itab[ , c("dx","dsp_int_c","dsp_TQP_c","dsp_NIS_c")]
+    itab <- dplyr::rename(itab,dsp_int=dsp_int_c,dsp_TQP=dsp_TQP_c,dsp_NIS=dsp_NIS_c)
   }
   if(conservative==FALSE) {
-    itab <- itab[ , c("dx","totaln","dsp_noncons")]
-    itab <- dplyr::rename(itab,dsp=dsp_noncons)
+    itab <- itab[ , c("dx","dsp_int","dsp_TQP","dsp_NIS")]
   }
 
 
@@ -96,7 +101,7 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
   for(i in dx_nums){
 
     if( (messages==TRUE) && (i%%5==0 || i==num_dx) ){
-      message("Determining DSP for Diagnosis ", i, " of ", num_dx)
+      message("Determining DSPs for Diagnosis ", i, " of ", num_dx)
     }
 
     # Create column name
@@ -122,10 +127,9 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
     temp <- temp[order(temp$n), ]
 
     # Reorder columns and drop dx and n
-    temp <- temp[ , c("totaln","dsp")]
-
+    temp <- temp[ , c("dsp_int","dsp_TQP","dsp_NIS")]
     # Rename columns
-    names(temp) <- paste0(c("totaln","dsp"), i)
+    names(temp) <- paste0(c("dsp_int","dsp_TQP","dsp_NIS"), i)
 
     # Add temp columns to dataframe
     df <- .insert_columns(df, dx_name, temp)
@@ -140,18 +144,18 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
   if(messages==TRUE){
     mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
     message("Time elapsed ", mindiff, " minutes")
-    message("Calculating survival predictions")
+    message("Calculating survival predictions based on international data")
   }
 
   # Duplicate table of diagnoses and convert to long form
   df <- dplyr::mutate(df,RowID=dplyr::row_number())
   df_calc <- df
-  df_calc <- dplyr::select(df_calc,RowID,dplyr::starts_with("dsp"))
-  df_calc <- tidyr::pivot_longer(df_calc,cols=tidyr::starts_with("dsp"),names_to="ColName")
+  df_calc <- dplyr::select(df_calc,RowID,dplyr::starts_with("dsp_int"))
+  df_calc <- tidyr::pivot_longer(df_calc,cols=tidyr::starts_with("dsp_int"),names_to="ColName")
   df_calc <- dplyr::group_by(df_calc,RowID)
   df_calc <- dplyr::mutate(df_calc,ColID1=dplyr::row_number())
   df_calc <- dplyr::ungroup(df_calc)
-  df_calc <- dplyr::rename(df_calc,dsp=value)
+  df_calc <- dplyr::rename(df_calc,dsp_int=value)
   df_calc <- dplyr::select(df_calc,-ColName)
 
   # Calculate minimum and product for each individual
@@ -159,23 +163,103 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
   #    and min() returns Inf or -Inf for empty set, with warnings
   # The following code returns NA if no diagnosis has a DSP from the lookup table
   df_calc2 <- dplyr::group_by(df_calc,RowID)
-  df_calc2 <- dplyr::mutate(df_calc2,all_na=all(is.na(dsp)))
-  df_calc2 <- dplyr::mutate(df_calc2,PS_iciss_prod=prod(dsp,na.rm=TRUE))
-  df_calc2 <- dplyr::mutate(df_calc2,PS_iciss_prod=dplyr::if_else(all_na==TRUE,NA,PS_iciss_prod))
-  df_calc2 <- suppressWarnings(dplyr::mutate(df_calc2,PS_iciss_min=min(dsp,na.rm=TRUE)))
-  df_calc2 <- dplyr::mutate(df_calc2,PS_iciss_min=dplyr::if_else(all_na==TRUE,NA,PS_iciss_min))
+  df_calc2 <- dplyr::mutate(df_calc2,all_na=all(is.na(dsp_int)))
+  df_calc2 <- dplyr::mutate(df_calc2,PS_int_prod=prod(dsp_int,na.rm=TRUE))
+  df_calc2 <- dplyr::mutate(df_calc2,PS_int_prod=dplyr::if_else(all_na==TRUE,NA,PS_int_prod))
+  df_calc2 <- suppressWarnings(dplyr::mutate(df_calc2,PS_int_min=min(dsp_int,na.rm=TRUE)))
+  df_calc2 <- dplyr::mutate(df_calc2,PS_int_min=dplyr::if_else(all_na==TRUE,NA,PS_int_min))
   df_calc2 <- dplyr::ungroup(df_calc2)
 
   # Keep one set of results for each individual and add to original dataframe
   df_results <- dplyr::filter(df_calc2,ColID1==1)
-  df_results <- dplyr::select(df_results,RowID,PS_iciss_prod,PS_iciss_min)
+  df_results <- dplyr::select(df_results,RowID,PS_int_prod,PS_int_min)
   df_results <- dplyr::rename(df_results,RowID2=RowID)
   df_results <- dplyr::arrange(df_results,RowID2)
 
-  df <- dplyr::select(df,-dplyr::starts_with("totaln"))
   df <- dplyr::arrange(df,RowID)
   df <- dplyr::bind_cols(df,df_results)
   df <- dplyr::select(df,-dplyr::starts_with("RowID"))
+
+
+  if(messages==TRUE){
+    mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
+    message("Time elapsed ", mindiff, " minutes")
+    message("Calculating survival predictions based on TQP data")
+  }
+
+  # Duplicate table of diagnoses and convert to long form
+  df <- dplyr::mutate(df,RowID=dplyr::row_number())
+  df_calc <- df
+  df_calc <- dplyr::select(df_calc,RowID,dplyr::starts_with("dsp_TQP",ignore.case=FALSE))
+  df_calc <- tidyr::pivot_longer(df_calc,cols=tidyr::starts_with("dsp_TQP",ignore.case=FALSE),names_to="ColName")
+  df_calc <- dplyr::group_by(df_calc,RowID)
+  df_calc <- dplyr::mutate(df_calc,ColID1=dplyr::row_number())
+  df_calc <- dplyr::ungroup(df_calc)
+  df_calc <- dplyr::rename(df_calc,dsp_TQP=value)
+  df_calc <- dplyr::select(df_calc,-ColName)
+
+  # Calculate minimum and product for each individual
+  # Without modification, prod() returns 1 for empty set,
+  #    and min() returns Inf or -Inf for empty set, with warnings
+  # The following code returns NA if no diagnosis has a DSP from the lookup table
+  df_calc2 <- dplyr::group_by(df_calc,RowID)
+  df_calc2 <- dplyr::mutate(df_calc2,all_na=all(is.na(dsp_TQP)))
+  df_calc2 <- dplyr::mutate(df_calc2,PS_TQP_prod=prod(dsp_TQP,na.rm=TRUE))
+  df_calc2 <- dplyr::mutate(df_calc2,PS_TQP_prod=dplyr::if_else(all_na==TRUE,NA,PS_TQP_prod))
+  df_calc2 <- suppressWarnings(dplyr::mutate(df_calc2,PS_TQP_min=min(dsp_TQP,na.rm=TRUE)))
+  df_calc2 <- dplyr::mutate(df_calc2,PS_TQP_min=dplyr::if_else(all_na==TRUE,NA,PS_TQP_min))
+  df_calc2 <- dplyr::ungroup(df_calc2)
+
+  # Keep one set of results for each individual and add to original dataframe
+  df_results <- dplyr::filter(df_calc2,ColID1==1)
+  df_results <- dplyr::select(df_results,RowID,PS_TQP_prod,PS_TQP_min)
+  df_results <- dplyr::rename(df_results,RowID2=RowID)
+  df_results <- dplyr::arrange(df_results,RowID2)
+
+  df <- dplyr::arrange(df,RowID)
+  df <- dplyr::bind_cols(df,df_results)
+  df <- dplyr::select(df,-dplyr::starts_with("RowID"))
+
+
+  if(messages==TRUE){
+    mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
+    message("Time elapsed ", mindiff, " minutes")
+    message("Calculating survival predictions based on NIS data")
+  }
+
+  # Duplicate table of diagnoses and convert to long form
+  df <- dplyr::mutate(df,RowID=dplyr::row_number())
+  df_calc <- df
+  df_calc <- dplyr::select(df_calc,RowID,dplyr::starts_with("dsp_NIS",ignore.case=FALSE))
+  df_calc <- tidyr::pivot_longer(df_calc,cols=tidyr::starts_with("dsp_NIS",ignore.case=FALSE),names_to="ColName")
+  df_calc <- dplyr::group_by(df_calc,RowID)
+  df_calc <- dplyr::mutate(df_calc,ColID1=dplyr::row_number())
+  df_calc <- dplyr::ungroup(df_calc)
+  df_calc <- dplyr::rename(df_calc,dsp_NIS=value)
+  df_calc <- dplyr::select(df_calc,-ColName)
+
+  # Calculate minimum and product for each individual
+  # Without modification, prod() returns 1 for empty set,
+  #    and min() returns Inf or -Inf for empty set, with warnings
+  # The following code returns NA if no diagnosis has a DSP from the lookup table
+  df_calc2 <- dplyr::group_by(df_calc,RowID)
+  df_calc2 <- dplyr::mutate(df_calc2,all_na=all(is.na(dsp_NIS)))
+  df_calc2 <- dplyr::mutate(df_calc2,PS_NIS_prod=prod(dsp_NIS,na.rm=TRUE))
+  df_calc2 <- dplyr::mutate(df_calc2,PS_NIS_prod=dplyr::if_else(all_na==TRUE,NA,PS_NIS_prod))
+  df_calc2 <- suppressWarnings(dplyr::mutate(df_calc2,PS_NIS_min=min(dsp_NIS,na.rm=TRUE)))
+  df_calc2 <- dplyr::mutate(df_calc2,PS_NIS_min=dplyr::if_else(all_na==TRUE,NA,PS_NIS_min))
+  df_calc2 <- dplyr::ungroup(df_calc2)
+
+  # Keep one set of results for each individual and add to original dataframe
+  df_results <- dplyr::filter(df_calc2,ColID1==1)
+  df_results <- dplyr::select(df_results,RowID,PS_NIS_prod,PS_NIS_min)
+  df_results <- dplyr::rename(df_results,RowID2=RowID)
+  df_results <- dplyr::arrange(df_results,RowID2)
+
+  df <- dplyr::arrange(df,RowID)
+  df <- dplyr::bind_cols(df,df_results)
+  df <- dplyr::select(df,-dplyr::starts_with("RowID"))
+
 
   if(messages==TRUE){
     mindiff=round(as.double(difftime(Sys.time(),starttime,units="secs"))/60)
@@ -184,7 +268,7 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
 
   message("=============================================")
   message("REMINDER")
-  message("ICDPICR Version 2.0.4 IS BEING TESTED")
+  message("ICDPICR Version 2.0.5 IS BEING TESTED")
   message("Major bugs and flaws may still exist")
   message("Please report issues to david.clark@tufts.edu")
   message("or at github/clark-david/icdpicr2/issues")

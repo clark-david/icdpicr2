@@ -52,7 +52,7 @@
 
 framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
 
-  #Version 241216
+  #Version 250118
 
   starttime=Sys.time()
 
@@ -175,7 +175,7 @@ framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
 
   message("=============================================")
   message("REMINDER")
-  message("ICDPICR Version 2.0.4 IS BEING TESTED")
+  message("ICDPICR Version 2.0.5 IS BEING TESTED")
   message("Major bugs and flaws may still exist")
   message("Please report issues to david.clark@tufts.edu")
   message("or at github/clark-david/icdpicr2/issues")

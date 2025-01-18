@@ -19,11 +19,11 @@ library(icdpicr2)
 ```
 
 
-*Version 241211*
+*Version 250118*
 
 **===================================**\
 **REMINDER**\
-**ICDPICR Version 2.0.4 IS BEING TESTED**\
+**ICDPICR Version 2.0.5 IS BEING TESTED**\
 **Major bugs and flaws may still exist**\
 **Please report issues to david.clark@tufts.edu**\
 **or at github/clark-david/icdpicr2/issues**\
@@ -41,7 +41,7 @@ The program “icdpicr2” was developed using the American College of Surgeons 
 
 Version 0 of “icdpicr” was provided on github.com, and Version 1 was added to the Comprehensive R Archive Network (CRAN) in January 2021.  This transition responded to issues raised by Sebastião and colleagues[2], and attempted to address the concerns of Airiksinen and colleagues[3] that methods developed for the ICD-10-CM modification used in the United States did not work well for other countries.  An independent evaluation of “icdpicr” Version 1 by Wan and colleagues[4] has found that it works quite well for ICD-10-CM data, but studies from other countries have still found it less satisfactory.[5,6]  Eskesen and colleagues[6] have pointed out that it does not even include all valid ICD-10 diagnoses published by the World Health Organization (WHO).     
 
-Version 2 of “icdpicr”, named “icdpicr2”, is a further update in response to these studies and numerous other inquiries and suggestions.  Because of copyright restrictions, it continues to use only the original version of the Abbreviated Injury Score (AIS).[7]  
+Version 2 of “icdpicr”, named “icdpicr2”, is a further update in response to these studies and numerous other inquiries and suggestions.  Because of copyright restrictions, it only attempts to approximate the original version of the Abbreviated Injury Score (AIS).[7]  
 
 
 ### The most important changes from Version 1 to Version 2 are as follows:
@@ -56,7 +56,7 @@ Version 2 of “icdpicr”, named “icdpicr2”, is a further update in respons
 
 * As before, Version 2 (“icdpicr2”) reports Maximum AIS for each body region and overall, Injury Severity Score (ISS),[9] and “New Injury Severity Score”,[10] and now reports the mortality predictions both from TQP and from NIS for each individual.
 
-* Version 2 (“icdpicr2”) reports mechanism and intent categories following the most recent CDC publication.[11]  It adds the CDC framework for body area and nature of injury,[12] and calculates an approximate survival probability based on the empirical survival for each cell of the framework.[13]  It computes two versions (“multiplicative injury” and “worst injury”) of an “ICD-based Injury Severity Score” (ICISS).[8,14]   
+* Version 2 (“icdpicr2”) reports mechanism and intent categories following the most recent CDC publication.[11]  It adds the CDC framework for body area and nature of injury,[12] and calculates an approximate survival probability based on the empirical survival for each cell of the framework.[13]  It computes two versions (“multiplicative injury” and “worst injury”) of an “ICD-based Injury Severity Score” (ICISS) based on international data.[8,14]  It also computes similar versions of ICISS based on TQP and NIS.   
 
 * Version 2 (“icdpicr2”) has also been modified in several ways so that it will run faster than previous versions, mostly by using more efficient methods of calculation.
 
@@ -79,7 +79,7 @@ Version 2 of “icdpicr”, named “icdpicr2”, is a further update in respons
 
 	4. Assigns an AIS score to truncated ICD-10-CM codes (3-6 digits long) as a weighted average of the corresponding 7-digit ICD-10-CM codes. This includes most basic ICD-10 codes.
 
-	5. Assigns an AIS score to ICD-10 injury codes published by the WHO, using a modification of the data published by Gedeborg and colleagues.[8]  When available, these AIS scores replace those determined in the step above.  Creates a table of all valid ICD-10 diagnosis codes with associated body region and AIS in order to calculate ISS; this table also includes the direct effects from regression.  Creates another table with “Diagnosis-specific Survival Probabilities” (DSP) for 4-digit ICD-10 codes, either obtained directly from the data published by Gedeborg and colleagues [8] or indirectly by assignment of DSP to a 4-digit truncation of longer diagnosis codes; these can be used to calculate an “ICD-based Injury Severity Score” (ICISS).[8,14]
+	5. Assigns an AIS score to ICD-10 injury codes published by the WHO, using a modification of the data published by Gedeborg and colleagues.[8]  When available, these AIS scores replace those determined in the step above.  Creates a table of all valid ICD-10 diagnosis codes with associated body region and AIS in order to calculate ISS; this table also includes the direct effects from regression.  Creates another table with “Diagnosis-specific Survival Probabilities” (DSP) for 4-digit ICD-10 codes, either obtained directly from the data published by Gedeborg and colleagues [8] or indirectly by assignment of DSP to a 4-digit truncation of longer diagnosis codes; these can be used to calculate several versions of the “ICD-based Injury Severity Score” (ICISS).[8,14]
 
 * **icd10aisE** (New in Version 2) – Produces a table of injury mechanisms and intents based upon codes starting with T, V, W, X, or Y in ICD-10 data.[11]  Produces a table corresponding to the “Framework for Presenting Injury Data” developed by the CDC,[12] modeled after the “Barell Matrix” previously developed for ICD-9.  The TQP PUF and NIS survival for subjects with an ICD-10-CM diagnosis in each cell of the framework is also calculated, and the minimum cell survival for a given subject is provided as a rough estimate of severity.[13]
 
@@ -93,9 +93,9 @@ Programs icd10aisA, icd10aisB, icd10aisC, icd10aisD, and icd10aisE, and a modifi
 
 * **i10_map_mech:**  This table is new in Version 2, replacing i10_ecode.  It uses the results of icd10aisE to assign a mechanism category for any ICD-10 external cause of injury code (starting with letters T, V, W, X, or Y), using a table proposed by the CDC.[11]
 
-* **i10_map_iciss:**  This table is new in Version 2.  It uses the results of icd10aisD to assign ICD-10 injury codes to a 4-digit ICD-10 code and its associated survival probability as published by Gedeborg and colleagues.[8]
+* **i10_map_iciss:**  This table is new in Version 2.  It uses the results of icd10aisD to assign ICD-10 injury codes to a 4-digit ICD-10 code (or a truncated version of longer modified ICD-10 codes) and its associated “Diagnosis-specific Survival Probability” (DSP) based on data published by Gedeborg and colleagues.[8]  Assigns similar DSPs based on data from TQP and NIS.
 
-* **i10_map_frame:**  This table is new in Version 2.  It uses the results of icd10aisE to assign ICD-10 injury codes to a cell in the CDC “Framework for Presenting Injury Data”.[12]
+* **i10_map_frame:**  This table is new in Version 2.  It uses the results of icd10aisE to assign ICD-10 injury codes to a cell in the CDC “Framework for Presenting Injury Data”.[12]  It also includes an estimated survival for patients with a diagnosis in that cell, based upon the results of icd10aisE.
 
 * **testdata:**  Sample data that can be used to demonstrate the functioning of the programs.
 
@@ -106,16 +106,18 @@ Programs icd10aisA, icd10aisB, icd10aisC, icd10aisD, and icd10aisE, and a modifi
 Reads in user data in the specified format.  Returns AIS, ISS, NISS, mortality predictions from the TQP and NIS models, and injury mechanisms.  Further details about the available options are provided in the help file for this function.
 
 * **Program “iciss”**
-Reads in user data in the specified format.  Returns two versions of the “ICD-based” Injury Severity Score (ICISS).  Further details about the available options are provided in the help file for this function.
+Reads in user data in the specified format.  Returns “multiplicative” and “minimum” versions of the “ICD-based” Injury Severity Score (ICISS) based on international data, TQP, and NIS.  Further details about the available options are provided in the help file for this function.
 
 * **Program “framework”**
 Reads in user data in the specified format.  Assigns each ICD-10 injury code to a cell in the CDC “Framework for Presenting Injury Data”.[12]  Returns a predicted survival for each case.  Further details about the available options are provided in the help file for this function.
 
 
 
-### **Updates 2.0.1 - 2.0.4**
+### **Updates 2.0.1 - 2.0.5**
 
 * Add some newer diagnosis codes to lookup tables (see icd10aisD and icd10aisE)
+
+* Add ICISS calculations based on TQP and NIS
 
 * Reprogram functions to run faster (especially for large databases)
 

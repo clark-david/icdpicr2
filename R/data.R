@@ -91,15 +91,22 @@
 #' Table i10_map_iciss
 #'
 #' A dataset containing ICD-10 diagnosis codes and their properties
-#' for calculation of ICD Injury Severity Score (ICISS).
+#' for calculation of several versions of the ICD Injury Severity Score (ICISS).
 #'
-#' @format A data frame with 20,551 rows and 5 variables:
+#' @format A data frame with 20,551 rows and 12 variables:
 #' \describe{
 #'   \item{dx}{A valid ICD-10 diagnosis code.}
-#'   \item{totaln}{The number of cases from which the observed survival was calculated.}
-#'   \item{dsp_noncons}{The observed survival for subjects with this diagnosis.}
-#'   \item{dsp_cons}{Same as above, but NA if totaln < 5.}
-#'   \item{version}{The most recent date when this dataset was revised.  Encoded vyymmdd.}
+#'   \item{digits1234} {The 4-digit version of dx.}
+#'   \item{tot_int}{The number of cases in international data from which the observed survival was calculated.}
+#'   \item{dsp_int}{The observed survival in international data for subjects with this diagnosis.}
+#'   \item{dsp_int_c}{Same as above, but NA if tot_int < 5.}
+#'   \item{tot_TQP}{The number of cases in TQP data from which the observed survival was calculated.}
+#'   \item{dsp_TQP}{The observed survival in TQP data for subjects with this diagnosis.}
+#'   \item{dsp_TQP_c}{Same as above, but NA if tot_TQP < 5.}
+#'   \item{tot_NIS}{The number of cases in NIS data from which the observed survival was calculated.}
+#'   \item{dsp_NIS}{The observed survival in NIS data for subjects with this diagnosis.}
+#'   \item{dsp_NIS_c}{Same as above, but NA if tot_NIS < 5.}
+#'   \item{Version}{The most recent date when this dataset was revised.  Encoded vyymmdd.}
 #'   ...
 #' }
 "i10_map_iciss"

@@ -28,22 +28,28 @@ Diagnosis codes should be character strings and may have a decimal or not.}
 A dataframe identical to the dataframe passed to the function with the following additional variables
          added:
          \itemize{
-         \item DSP_1-DSP_n: DSP for diagnosis codes 1..n
-         \item totaln_1-totaln_n: Number of cases from which DSP was calculated for diagnosis codes 1..n
-         \item PS_iciss_prod: ICISS calculated as the product of DSP
-         \item PS_iciss_min: ICISS calculated as the minimum of DSP
+         \item dsp_int1-dsp_intn: DSP for diagnosis codes 1..n, from international data
+         \item dsp_TQP1-dsp_TQPn: DSP for diagnosis codes 1..n, from TQP data
+         \item dsp_TQP1-dsp_NISn: DSP for diagnosis codes 1..n, from NIS data
+         \item PS_int_prod: ICISS calculated as the product of dsp_int1-dsp_intn
+         \item PS_int_min: ICISS calculated as the minimum of dsp_int1-dsp_intn
+         \item PS_TQP_prod: ICISS calculated as the product of dsp_TQP1-dsp_TQPn
+         \item PS_TQP_min: ICISS calculated as the minimum of dsp_TQP1-dsp_TQPn
+         \item PS_NIS_prod: ICISS calculated as the product of dsp_NIS1-dsp_NISn
+         \item PS_NIS_min: ICISS calculated as the minimum of dsp_NIS1-dsp_NISn
          }
 }
 \description{
-This function adds Diagnosis-specific Survival Probabilities (DSP) to a dataframe, based on the table
-   provided by Gedeborg and colleagues (J Trauma Acute Care Surgery 2014).  Codes longer than four digits
-   are treated as if they were four-digit ICD-10 codes as published by the World Health Organization.
+This function adds Diagnosis-specific Survival Probabilities (DSP) to a dataframe, based on the table provided by
+   Gedeborg and colleagues (J Trauma Acute Care Surgery 2014) and also TQP and NIS.  ICD-10-CM codes longer than
+   four digits are treated as if they were four-digit ICD-10 codes as published by the World Health Organization.
    Thus, an ICD-10-CM code like S00552A is considered the same as S005.
 For each observation this function will
 \enumerate{
    \item assign a severity (DSP) to each valid ICD-10 injury diagnosis code,
    \item calculate one version of ICISS as the product of these DSP, and
    \item calculate another version of ICISS as the minimum of these DSP.
+   \item It repeats the above using international data, TQP, and NIS as reference data.
 }
 }
 \details{

@@ -8,7 +8,7 @@
 #               UPDATE EXTERNAL CAUSE CATEGORIES
 #               DERIVE "BARELL MATRIX" CATEGORIES
 #
-#      David Clark, 2022-2024
+#      David Clark, 2022-2025
 #                     
 ##########################################################################
 
@@ -152,107 +152,6 @@ write_csv(d4,"barell6digits.csv")
 tabyl(d4,cell)
 
 
-#Determine mortality by cell
-
-d6<-read_csv("tqip2020cm.csv")
-#OR
-d6<-read_csv("nis2020cm.csv")
-
-d4<-read_csv("barell6digits.csv")
-
-d6<-mutate(d6,digits123456=str_sub(icdcm,1,6)) 
-
-d7<-full_join(d4,d6,by="digits123456")
-d7<-group_by(d7,INC_KEY,digits123456)
-d7<-mutate(d7,seq=row_number())
-d7<-ungroup(d7)
-tabyl(d7,seq)
-
-d8<-filter(d7,seq==1,is.na(icdcm)==FALSE,is.na(died)==FALSE)
-d8<-group_by(d8,cell)
-d8<-mutate(d8,cellseq=row_number())
-d8<-mutate(d8,n=max(cellseq))
-d8<-mutate(d8,Pm=sum(died)/n)
-d8<-ungroup(d8)
-
-d8test=filter(d8,cellseq==1)
-d8test=select(d8test,cell,Pm,n)
-#write_csv(d8test,"PmortNIScell.csv")
-#write_csv(d8test,"PmortTQPcell.csv")
-
-#Obtain weighted mean cell mortality
-d11<-read_csv("PmortNIScell.csv")
-d12<-read_csv("PmortTQPcell.csv")
-d13<-full_join(d11,d12,by="cell")
-d13<-mutate(d13,Pm.x=if_else(is.na(Pm.x),0,Pm.x))
-d13<-mutate(d13,Pm.y=if_else(is.na(Pm.y),0,Pm.y))
-d13<-mutate(d13,n.x=if_else(is.na(n.x),1,n.x))
-d13<-mutate(d13,n.y=if_else(is.na(n.y),1,n.y))
-d13<-mutate(d13,PmCell=(Pm.x*n.x+Pm.y*n.y)/(n.x+n.y))
-d13<-select(d13,cell,PmCell)
-write_csv(d13,"PmortCell")
-
-#Allow truncated codes, and then merge with list of all ICD codes
-d1<-read_csv("barell6digits.csv")
-d2<-read_csv("PmortCell")
-d3<-full_join(d1,d2,by="cell")
-
-d45<-mutate(d3,digits12345=str_sub(digits123456,1,5))
-d45<-group_by(d45,digits12345)
-d45<-mutate(d45,cell=if_else(max(cell)==min(cell),max(cell),"Uns//Uns"))
-d45<-mutate(d45,PmCell=if_else(max(PmCell)==min(PmCell),max(PmCell),0.0520))
-d45<-mutate(d45,seq=row_number())
-d45<-ungroup(d45)
-d45<-filter(d45,seq==1)
-d45<-mutate(d45,digits123456=digits12345)
-d45<-select(d45,digits123456,cell,PmCell)
-write_csv(d45,"barell5digits.csv")
-d44<-mutate(d3,digits1234=str_sub(digits123456,1,4))
-d44<-group_by(d44,digits1234)
-d44<-mutate(d44,cell=if_else(max(cell)==min(cell),max(cell),"Uns/Uns"))
-d44<-mutate(d44,PmCell=if_else(max(PmCell)==min(PmCell),max(PmCell),0.0520))
-d44<-mutate(d44,seq=row_number())
-d44<-ungroup(d44)
-d44<-filter(d44,seq==1)
-d44<-mutate(d44,digits123456=digits1234)
-d44<-select(d44,digits123456,cell,PmCell)
-write_csv(d44,"barell4digits.csv")
-d43<-mutate(d3,digits123=str_sub(digits123456,1,3))
-d43<-group_by(d43,digits123)
-d43<-mutate(d43,cell=if_else(max(cell)==min(cell),max(cell),"Uns/Uns"))
-d43<-mutate(d43,PmCell=if_else(max(PmCell)==min(PmCell),max(PmCell),0.0520))
-d43<-mutate(d43,seq=row_number())
-d43<-ungroup(d43)
-d43<-filter(d43,seq==1)
-d43<-mutate(d43,digits123456=digits123)
-d43<-select(d43,digits123456,cell,PmCell)
-write_csv(d43,"barell3digits.csv")
-
-d3456<-bind_rows(d3,d45,d44,d43)
-d3456<-group_by(d3456,digits123456)
-d3456<-mutate(d3456,seq=row_number())
-d3456<-ungroup(d3456)
-d3456<-filter(d3456,seq==1)
-d3456<-select(d3456,-seq)
-d3456<-arrange(d3456,digits123456)
-write_csv(d3456,"barell3456digits.csv")
-
-#Merge with full list of ICD-10 codes
-
-d3456=read_csv("barell3456digits.csv")
-d5<-read_csv("ICD_AIS.csv")
-d5<-mutate(d5,digits123456=str_sub(ICD,1,6))
-d5<-select(d5,ICD,digits123456)
-
-d6<-full_join(d5,d3456,by="digits123456")
-d6<-filter(d6,is.na(ICD)==FALSE)
-d6<-arrange(d6,ICD)
-d6<-mutate(d6,cell=if_else(is.na(cell),"Unk/Unk",cell))
-d6<-mutate(d6,PmCell=if_else(is.na(PmCell),0.0520,PmCell))
-d6<-select(d6,-digits123456)
-
-write_csv(d6,"ICD_Cells.csv")
-
 
 #COMORBIDITY SCORES (using package=comorbidity)
 
@@ -270,7 +169,6 @@ d5<-rename(d5,score=...50)
 
 
 ########## ADDED OR MODIFIED 2024 ###############################################
-
 
 
 #Derive mechanism and intent for truncated codes, including basic ICD-10
@@ -378,6 +276,124 @@ d10<-arrange(d10,ICD10)
 write_csv(d10,"/Users/davideugeneclark/Documents/icdpicr2/ICD_Mech_241120.csv")
 
 
+########## ADDED OR MODIFIED 2025 ###############################################
+
+
+#Determine mortality by cell
+
+d6<-read_csv("/Users/davideugeneclark/Documents/icdpicr/tqip2020cm.csv")
+#OR
+d6<-read_csv("/Users/davideugeneclark/Documents/icdpicr/nis2020cm.csv")
+
+d4<-read_csv("/Users/davideugeneclark/Documents/icdpicr/barell6digits.csv")
+
+d6<-mutate(d6,digits123456=str_sub(icdcm,1,6)) 
+
+d7<-full_join(d4,d6,by="digits123456")
+d7<-group_by(d7,INC_KEY,digits123456)
+d7<-mutate(d7,seq=row_number())
+d7<-ungroup(d7)
+tabyl(d7,seq)
+
+d8<-filter(d7,seq==1,is.na(icdcm)==FALSE,is.na(died)==FALSE)
+d8<-group_by(d8,cell)
+d8<-mutate(d8,cellseq=row_number())
+d8<-mutate(d8,n=max(cellseq))
+d8<-mutate(d8,Pm=sum(died)/n)
+d8<-ungroup(d8)
+
+#Second step: Use only most severe cell for each person, then recompute mortality
+d9<-group_by(d8,INC_KEY)
+d9<-arrange(d9,desc(Pm))
+d9<-mutate(d9,incseq=row_number())
+d9<-ungroup(d9)
+d9<-filter(d9,incseq==1)
+d9<-group_by(d9,cell)
+d9<-mutate(d9,cellseq=row_number())
+d9<-mutate(d9,n=max(cellseq))
+d9<-mutate(d9,Pm=sum(died)/n)
+d9<-ungroup(d9)
+
+d9test=filter(d9,cellseq==1)
+d9test=select(d9test,cell,Pm,n)
+#write_csv(d9test,"/Users/davideugeneclark/Documents/icdpicr2/PmortNIScellV2.csv")
+write_csv(d9test,"/Users/davideugeneclark/Documents/icdpicr2/PmortTQPcellV2.csv")
+
+
+#Obtain weighted mean cell mortality
+d11<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/PmortNIScellV2.csv")
+d12<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/PmortTQPcellV2.csv")
+d13<-full_join(d11,d12,by="cell")
+d13<-mutate(d13,Pm.x=if_else(is.na(Pm.x),0,Pm.x))
+d13<-mutate(d13,Pm.y=if_else(is.na(Pm.y),0,Pm.y))
+d13<-mutate(d13,n.x=if_else(is.na(n.x),1,n.x))
+d13<-mutate(d13,n.y=if_else(is.na(n.y),1,n.y))
+d13<-mutate(d13,PmCell=(Pm.x*n.x+Pm.y*n.y)/(n.x+n.y))
+d13<-select(d13,cell,PmCell)
+write_csv(d13,"/Users/davideugeneclark/Documents/icdpicr2/PmortCellV2.csv")
+
+#Allow truncated codes, and then merge with list of all ICD codes
+d1<-read_csv("/Users/davideugeneclark/Documents/icdpicr/barell6digits.csv")
+d2<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/PmortCellV2.csv")
+d3<-full_join(d1,d2,by="cell")
+
+d45<-mutate(d3,digits12345=str_sub(digits123456,1,5))
+d45<-group_by(d45,digits12345)
+d45<-mutate(d45,cell=if_else(max(cell)==min(cell),max(cell),"Uns//Uns"))
+d45<-mutate(d45,PmCell=if_else(max(PmCell)==min(PmCell),max(PmCell),0.0520))
+d45<-mutate(d45,seq=row_number())
+d45<-ungroup(d45)
+d45<-filter(d45,seq==1)
+d45<-mutate(d45,digits123456=digits12345)
+d45<-select(d45,digits123456,cell,PmCell)
+write_csv(d45,"/Users/davideugeneclark/Documents/icdpicr2/barell5digits.csv")
+d44<-mutate(d3,digits1234=str_sub(digits123456,1,4))
+d44<-group_by(d44,digits1234)
+d44<-mutate(d44,cell=if_else(max(cell)==min(cell),max(cell),"Uns/Uns"))
+d44<-mutate(d44,PmCell=if_else(max(PmCell)==min(PmCell),max(PmCell),0.0520))
+d44<-mutate(d44,seq=row_number())
+d44<-ungroup(d44)
+d44<-filter(d44,seq==1)
+d44<-mutate(d44,digits123456=digits1234)
+d44<-select(d44,digits123456,cell,PmCell)
+write_csv(d44,"/Users/davideugeneclark/Documents/icdpicr2/barell4digits.csv")
+d43<-mutate(d3,digits123=str_sub(digits123456,1,3))
+d43<-group_by(d43,digits123)
+d43<-mutate(d43,cell=if_else(max(cell)==min(cell),max(cell),"Uns/Uns"))
+d43<-mutate(d43,PmCell=if_else(max(PmCell)==min(PmCell),max(PmCell),0.0520))
+d43<-mutate(d43,seq=row_number())
+d43<-ungroup(d43)
+d43<-filter(d43,seq==1)
+d43<-mutate(d43,digits123456=digits123)
+d43<-select(d43,digits123456,cell,PmCell)
+write_csv(d43,"/Users/davideugeneclark/Documents/icdpicr2/barell3digits.csv")
+
+d3456<-bind_rows(d3,d45,d44,d43)
+d3456<-group_by(d3456,digits123456)
+d3456<-mutate(d3456,seq=row_number())
+d3456<-ungroup(d3456)
+d3456<-filter(d3456,seq==1)
+d3456<-select(d3456,-seq)
+d3456<-arrange(d3456,digits123456)
+write_csv(d3456,"/Users/davideugeneclark/Documents/icdpicr2/barell3456digits.csv")
+
+#Merge with full list of ICD-10 codes
+
+d3456=read_csv("/Users/davideugeneclark/Documents/icdpicr2/barell3456digits.csv")
+d5<-read_csv("ICD_AIS.csv")
+d5<-mutate(d5,digits123456=str_sub(ICD,1,6))
+d5<-select(d5,ICD,digits123456)
+
+d6<-full_join(d5,d3456,by="digits123456")
+d6<-filter(d6,is.na(ICD)==FALSE)
+d6<-arrange(d6,ICD)
+d6<-mutate(d6,cell=if_else(is.na(cell),"Unk/Unk",cell))
+d6<-mutate(d6,PmCell=if_else(is.na(PmCell),0.0520,PmCell))
+d6<-select(d6,-digits123456)
+
+write_csv(d6,"/Users/davideugeneclark/Documents/icdpicr2/ICD_CellsV2.csv")
+
+
 #  MAKE LOOKUP TABLES FOR ICDPICR2
 
 etab<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICD_Mech_241120.csv")
@@ -387,9 +403,9 @@ i10_map_mech<-distinct(etab)
 i10_map_mech<-mutate(i10_map_mech,version="v241120")
 write_csv(i10_map_mech,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_mech_241120.csv")
 
-i10_map_frame<-read_csv("/Users/davideugeneclark/Documents/icdpicr/ICD_Cells.csv")
+i10_map_frame<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICD_CellsV2.csv")
 i10_map_frame<-rename(i10_map_frame,dx=ICD)
 i10_map_frame<-mutate(i10_map_frame,PsCell=1-PmCell)
-i10_map_frame<-mutate(i10_map_frame,version="v241027")
-write_csv(i10_map_frame,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_frame_241027.csv")
+i10_map_frame<-mutate(i10_map_frame,version="v250113")
+write_csv(i10_map_frame,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_frame_250113.csv")
 

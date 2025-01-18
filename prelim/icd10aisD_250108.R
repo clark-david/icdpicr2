@@ -11,7 +11,7 @@
 #               ALLOW FOR TRUNCATED ICD CODES, INCLUDING BASIC ICD-10
 #               PRODUCE FINAL TABLE FOR CALCULATING ISS
 #
-#      David Clark, 2022-2024
+#      David Clark, 2022-2025
 #                     
 ##########################################################################
 
@@ -28,7 +28,6 @@ require(janitor)
 require(broom)
 require(pROC)
 require(icdpicr)
-require(comorbidity)
 
 
 #2
@@ -643,7 +642,17 @@ d7<-mutate(d7,version="v241119")
 d7<-select(d7,-seq,-already_in,-totaln,-dsp)
 write_csv(d7,"/Users/davideugeneclark/Documents/icdpicr2/ICD_AIS_241123.csv")
 
-#Unduplicate to create i10_map_iciss.csv
+#Create i10_map_sev
+i10_map_sev<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICD_AIS_241123.csv")
+i10_map_sev<-rename(i10_map_sev,dx=ICD,issbr=BR,severity=AIS)
+i10_map_sev<-mutate(i10_map_sev,version="v241123")
+write_csv(i10_map_sev,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_sev_241123.csv")
+
+
+####### MODIFIED JANUARY 2025 ##########################################################
+
+
+#Unduplicate to create International (Gedeborg) DSP data 
 d8<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICDAIS_5.csv")
 d8<-arrange(d8,ICD,already_in)
 d8<-group_by(d8,ICD)
@@ -660,16 +669,138 @@ d8<-mutate(d8,totaln=if_else((totaln<0),NA,totaln))
 d8<-mutate(d8,dsp=if_else((dsp<0|dsp>1),NA,dsp))
 d8<-mutate(d8,dsp_cons=if_else(totaln<5,1,dsp))
 d8<-select(d8,ICD,totaln,dsp,dsp_cons)
-d8<-rename(d8,dsp_noncons=dsp)
-d8<-rename(d8,dx=ICD)
-d8<-mutate(d8,version="v241123")
-write_csv(d8,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_iciss_241123.csv")
+d8<-rename(d8,dx=ICD,tot_int=totaln,dsp_int=dsp,dsp_int_cons=dsp_cons)
 
-#Create i10_map_sev
-i10_map_sev<-read_csv("/Users/davideugeneclark/Documents/icdpicr2/ICD_AIS_241123.csv")
-i10_map_sev<-rename(i10_map_sev,dx=ICD,issbr=BR,severity=AIS)
-i10_map_sev<-mutate(i10_map_sev,version="v241123")
-write_csv(i10_map_sev,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_sev_241123.csv")
 
+#Obtain DSP data from TQP
+d10<-read_csv("/Users/davideugeneclark/Documents/icdpicr/tqip2020cm.csv")
+#Get 4-digit ICD and unduplicate within patients
+d11<-mutate(d10,digits1234=str_sub(icdcm,1,4))
+d11<-group_by(d11,INC_KEY,digits1234)
+d11<-mutate(d11,seq=row_number())
+d11<-ungroup(d11)
+d11<-filter(d11,seq==1)
+#Determine count and proportion surviving for patients with each 4-digit ICD
+d11<-select(d11,INC_KEY,digits1234,died)
+d11<-group_by(d11,digits1234)
+d11<-mutate(d11,seq=row_number())
+d11<-mutate(d11,tot_tqp=max(seq))
+d11<-mutate(d11,dsp_tqp=1-mean(died))
+d11<-ungroup(d11)
+d11a<-filter(d11,seq==1)
+d11a<-select(d11a,digits1234,tot_tqp,dsp_tqp)
+d11a<-rename(d11a,dx=digits1234)
+d11a<-mutate(d11a,dsp_tqp_c=if_else(tot_tqp<5,1,dsp_tqp))
+
+#Repeat determinations including only the worst injury for each person
+d11b<-group_by(d11,INC_KEY)
+d11b<-arrange(d11b,dsp_tqp)
+d11b<-mutate(d11b,seq=row_number())
+d11b<-ungroup(d11b)
+d11b<-filter(d11b,seq==1)
+d11b<-group_by(d11b,digits1234)
+d11b<-mutate(d11b,seq=row_number())
+d11b<-mutate(d11b,tot_tqp2=max(seq))
+d11b<-mutate(d11b,dsp_tqp2=1-mean(died))
+d11b<-ungroup(d11b)
+d11b<-filter(d11b,seq==1)
+d11b<-select(d11b,digits1234,tot_tqp2,dsp_tqp2)
+d11b<-rename(d11b,dx=digits1234)
+d11b<-mutate(d11b,dsp_tqp2_c=if_else(tot_tqp2<5,1,dsp_tqp2))
+
+#Obtain DSP data from NIS
+d12 <- read_csv("/Users/davideugeneclark/Documents/icdpicr2/nistestdata.csv")
+d13 <- select(d12,-INC_KEY,-AGE,-DISPUNIFORM,-ELECTIVE,-HCUP_ED,-INJURY,-LOS,-validcode,-seq)
+d13 <- mutate(d13,temp_id=row_number())
+d13 <- pivot_longer(d13,cols=starts_with("I10_DX"),names_to="ColName")
+d13 <- mutate(d13,validcode=case_when(
+  str_sub(value,1,1)=="S" & str_sub(value,7,7)=="A" ~ 1,
+  str_sub(value,1,1)=="S" & str_sub(value,7,7)=="B" ~ 1,
+  str_sub(value,1,1)=="S" & str_sub(value,7,7)=="C" ~ 1,
+  str_sub(value,1,1)=="T" & str_sub(value,2,3)=="07" ~ 1,
+  str_sub(value,1,1)=="T" & str_sub(value,2,3)=="14" ~ 1,
+  str_sub(value,1,1)=="T" & str_sub(value,2,2)=="2"  ~ 1,
+  str_sub(value,1,1)=="T" & str_sub(value,2,3)=="30" ~ 1,
+  str_sub(value,1,1)=="T" & str_sub(value,2,3)=="31" ~ 1,
+  str_sub(value,1,1)=="T" & str_sub(value,2,3)=="32" ~ 1,
+  str_sub(value,1,5)=="T79.A" & str_sub(value,7,7)=="A" ~ 1, 
+  TRUE ~ 0
+) )
+d13 <- filter(d13,validcode==1)
+#Get 4-digit ICD and unduplicate within patients
+d13<-mutate(d13,digits1234=str_sub(value,1,4))
+d13<-group_by(d13,temp_id,digits1234)
+d13<-mutate(d13,seq=row_number())
+d13<-ungroup(d13)
+d13<-filter(d13,seq==1)
+#Determine count and proportion surviving for patients with each 4-digit ICD
+d13<-select(d13,temp_id,digits1234,died)
+d13<-group_by(d13,digits1234)
+d13<-mutate(d13,seq=row_number())
+d13<-mutate(d13,tot_nis=max(seq))
+d13<-mutate(d13,dsp_nis=1-mean(died))
+d13<-ungroup(d13)
+d13a<-filter(d13,seq==1)
+d13a<-select(d13a,digits1234,tot_nis,dsp_nis)
+d13a<-rename(d13a,dx=digits1234)
+d13a<-mutate(d13a,dsp_nis_c=if_else(tot_nis<5,1,dsp_nis))
+
+#Repeat determinations including only the worst injury for each person
+d13b<-group_by(d13,temp_id)
+d13b<-arrange(d13b,dsp_nis)
+d13b<-mutate(d13b,seq=row_number())
+d13b<-ungroup(d13b)
+d13b<-filter(d13b,seq==1)
+d13b<-group_by(d13b,digits1234)
+d13b<-mutate(d13b,seq=row_number())
+d13b<-mutate(d13b,tot_nis2=max(seq))
+d13b<-mutate(d13b,dsp_nis2=1-mean(died))
+d13b<-ungroup(d13b)
+d13b<-filter(d13b,seq==1)
+d13b<-select(d13b,digits1234,tot_nis2,dsp_nis2)
+d13b<-rename(d13b,dx=digits1234)
+d13b<-mutate(d13b,dsp_nis2_c=if_else(tot_nis2<5,1,dsp_nis2))
+
+
+#Merge data from International,TQP,NIS and generalize to ICD-10-CM 
+d15<-full_join(d8,d11a,by="dx")
+d15<-full_join(d15,d11b,by="dx")
+d15<-full_join(d15,d13a,by="dx")
+d15<-full_join(d15,d13b,by="dx")
+
+d16<-rename(d15,dsp_int_c=dsp_int_cons)
+d16<-rename(d16,tot_TQP=tot_tqp2,dsp_TQP=dsp_tqp2,dsp_TQP_c=dsp_tqp2_c)
+d16<-rename(d16,tot_NIS=tot_nis2,dsp_NIS=dsp_nis2,dsp_NIS_c=dsp_nis2_c)
+d16<-mutate(d16,digits1234=str_sub(dx,1,4))
+d16<-group_by(d16,digits1234)
+d16<-mutate(d16,tot_tqp=min(tot_tqp,na.rm=TRUE))
+d16<-mutate(d16,dsp_tqp=min(dsp_tqp,na.rm=TRUE))
+d16<-mutate(d16,dsp_tqp_c=min(dsp_tqp_c,na.rm=TRUE))
+d16<-mutate(d16,tot_TQP=min(tot_TQP,na.rm=TRUE))
+d16<-mutate(d16,dsp_TQP=min(dsp_TQP,na.rm=TRUE))
+d16<-mutate(d16,dsp_TQP_c=min(dsp_TQP_c,na.rm=TRUE))
+d16<-mutate(d16,tot_nis=min(tot_nis,na.rm=TRUE))
+d16<-mutate(d16,dsp_nis=min(dsp_nis,na.rm=TRUE))
+d16<-mutate(d16,dsp_nis_c=min(dsp_nis_c,na.rm=TRUE))
+d16<-mutate(d16,tot_NIS=min(tot_NIS,na.rm=TRUE))
+d16<-mutate(d16,dsp_NIS=min(dsp_NIS,na.rm=TRUE))
+d16<-mutate(d16,dsp_NIS_c=min(dsp_NIS_c,na.rm=TRUE))
+d16<-ungroup(d16)
+d16<-mutate(d16,tot_tqp=if_else(tot_tqp==Inf,NA,tot_tqp))
+d16<-mutate(d16,dsp_tqp=if_else(dsp_tqp==Inf,NA,dsp_tqp))
+d16<-mutate(d16,dsp_tqp_c=if_else(dsp_tqp_c==Inf,NA,dsp_tqp_c))
+d16<-mutate(d16,tot_TQP=if_else(tot_TQP==Inf,NA,tot_TQP))
+d16<-mutate(d16,dsp_TQP=if_else(dsp_TQP==Inf,NA,dsp_TQP))
+d16<-mutate(d16,dsp_TQP_c=if_else(dsp_TQP_c==Inf,NA,dsp_TQP_c))
+d16<-mutate(d16,tot_nis=if_else(tot_nis==Inf,NA,tot_nis))
+d16<-mutate(d16,dsp_nis=if_else(dsp_nis==Inf,NA,dsp_nis))
+d16<-mutate(d16,dsp_nis_c=if_else(dsp_nis_c==Inf,NA,dsp_nis_c))
+d16<-mutate(d16,tot_NIS=if_else(tot_NIS==Inf,NA,tot_NIS))
+d16<-mutate(d16,dsp_NIS=if_else(dsp_NIS==Inf,NA,dsp_NIS))
+d16<-mutate(d16,dsp_NIS_c=if_else(dsp_NIS_c==Inf,NA,dsp_NIS_c))
+
+d16<-mutate(d16,Version="v250111")
+d16<-select(d16,-tot_nis,-dsp_nis,-dsp_nis_c,-tot_tqp,-dsp_tqp,-dsp_tqp_c)
+write_csv(d16,"/Users/davideugeneclark/Documents/icdpicr2/i10_map_iciss_250111.csv")
 
         
