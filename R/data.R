@@ -43,7 +43,7 @@
 #' @format A data frame with 20,551 rows and 12 variables:
 #' \describe{
 #'   \item{dx}{A valid ICD-10 diagnosis code.}
-#'   \item{digits1234} {The 4-digit version of dx.}
+#'   \item{digits1234}{The 4-digit version of dx.}
 #'   \item{tot_int}{The number of cases in international data from which the observed survival was calculated.}
 #'   \item{dsp_int}{The observed survival in international data for subjects with this diagnosis.}
 #'   \item{dsp_int_c}{Same as above, but NA if tot_int < 5.}
