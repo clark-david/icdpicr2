@@ -54,7 +54,7 @@
 
 cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
 
-  #Version 250118
+  #Version 250702
 
   starttime=Sys.time()
 
@@ -346,13 +346,6 @@ cat_trauma2 <- function(df, dx_pre, messages = TRUE) {
   # Set rownames
   rownames(df) <- 1:nrow(df)
 
-  message("=============================================")
-  message("REMINDER")
-  message("ICDPICR Version 2.0.5 IS BEING TESTED")
-  message("Major bugs and flaws may still exist")
-  message("Please report issues to david.clark@tufts.edu")
-  message("or at github/clark-david/icdpicr2/issues")
-  message("==============================================")
 
   # Return dataframe
   df

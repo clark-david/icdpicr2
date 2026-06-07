@@ -1,13 +1,10 @@
 ---
-title: "Implementation Details"
+title: "Response"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{implementation}
+  %\VignetteIndexEntry{preliminary}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-*Version 260607*
-
-
-### Update
+Empty for now

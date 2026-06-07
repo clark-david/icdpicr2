@@ -14,7 +14,6 @@ Description: Functions read a dataframe containing one or more International Cla
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.3
 Depends: 
     R (>= 2.10)
 Suggests: 
@@ -25,3 +24,4 @@ Imports:
     dplyr,
     stringr,
     tidyr
+Config/roxygen2/version: 8.0.0

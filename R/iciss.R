@@ -61,7 +61,7 @@
 
 iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
 
-  #Version 250111
+  #Version 250702
 
   starttime=Sys.time()
 
@@ -266,13 +266,6 @@ iciss <- function(df, dx_pre, conservative=TRUE, messages=TRUE) {
     message("Time elapsed ", mindiff, " minutes")
   }
 
-  message("=============================================")
-  message("REMINDER")
-  message("ICDPICR Version 2.0.5 IS BEING TESTED")
-  message("Major bugs and flaws may still exist")
-  message("Please report issues to david.clark@tufts.edu")
-  message("or at github/clark-david/icdpicr2/issues")
-  message("==============================================")
 
   # Return dataframe
   df
