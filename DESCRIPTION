@@ -1,10 +1,15 @@
 Package: icdpicr2
 Type: Package
-Title: Categorize ICD-10 Injury Codes
-Version: 2.0.5
-Author: David Clark, Adam Black
-Maintainer: David Clark <david.clark@tufts.edu>
-Description: Functions read a dataframe containing one or more ICD-10 codes per subject.
+Title: Categorize Injury Diagnosis Codes
+Version: 2.1.1
+Authors@R: c(person(given = "David",
+                    family = "Clark",
+                    role = c("aut", "cre"),
+                    email = "david.clark@tufts.edu"),
+              person(given = "Adam",
+                      family = "Black",
+                      role = "aut"))
+Description: Functions read a dataframe containing one or more International Classification of Diseases Tenth Revision codes per subject.
     They return original data with injury categorizations and severity scores added.
 License: MIT + file LICENSE
 Encoding: UTF-8
