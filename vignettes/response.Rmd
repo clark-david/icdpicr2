@@ -2,9 +2,11 @@
 title: "Response"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{preliminary}
+  %\VignetteIndexEntry{response}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 Empty for now
+Watch this space
+
