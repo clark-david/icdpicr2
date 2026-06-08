@@ -18,7 +18,7 @@ A data frame with 20,551 rows and 12 variables:
   \item{tot_NIS}{The number of cases in NIS data from which the observed survival was calculated.}
   \item{dsp_NIS}{The observed survival in NIS data for subjects with this diagnosis.}
   \item{dsp_NIS_c}{Same as above, but NA if tot_NIS < 5.}
-  \item{Version}{The most recent date when this dataset was revised.  Encoded vyymmdd.}
+  \item{version}{The most recent date when this dataset was revised.  Encoded vyymmdd.}
   ...
 }
 }

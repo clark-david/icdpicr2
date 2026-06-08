@@ -19,7 +19,7 @@ A data frame with 20,000 rows and 13 variables:
   \item{I10_DX8}{8th ICD-10-CM injury code recorded on an encounter.}
   \item{I10_DX9}{9th ICD-10-CM injury code recorded on an encounter.}
   \item{I10_DX10}{10th ICD-10-CM injury code recorded on an encounter.}
-  \item{Version}{The most recent date when this dataset was revised. Encoded vyymmdd.}
+  \item{version}{The most recent date when this dataset was revised. Encoded vyymmdd.}
   ...
 }
 }

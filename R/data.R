@@ -11,7 +11,7 @@
 #'   \item{TQIPeffect}{The coefficient for this diagnosis in the TQP regression model.}
 #'   \item{TQIPint}{The intercept in the TQP regression model.}
 #'   \item{NISeffect}{The coefficient for this diagnosis in the NIS regression model.}
-#'   \item{NISint}{The intercept in the TQP regression model.}
+#'   \item{NISint}{The intercept in the NIS regression model.}
 #'   \item{version}{The most recent date when this dataset was revised.  Encoded vyymmdd.}
 #'   ...
 #' }
@@ -53,7 +53,7 @@
 #'   \item{tot_NIS}{The number of cases in NIS data from which the observed survival was calculated.}
 #'   \item{dsp_NIS}{The observed survival in NIS data for subjects with this diagnosis.}
 #'   \item{dsp_NIS_c}{Same as above, but NA if tot_NIS < 5.}
-#'   \item{Version}{The most recent date when this dataset was revised.  Encoded vyymmdd.}
+#'   \item{version}{The most recent date when this dataset was revised.  Encoded vyymmdd.}
 #'   ...
 #' }
 "i10_map_iciss"
@@ -94,7 +94,7 @@
 #'   \item{I10_DX8}{8th ICD-10-CM injury code recorded on an encounter.}
 #'   \item{I10_DX9}{9th ICD-10-CM injury code recorded on an encounter.}
 #'   \item{I10_DX10}{10th ICD-10-CM injury code recorded on an encounter.}
-#'   \item{Version}{The most recent date when this dataset was revised. Encoded vyymmdd.}
+#'   \item{version}{The most recent date when this dataset was revised. Encoded vyymmdd.}
 #'   ...
 #' }
 "testdata"

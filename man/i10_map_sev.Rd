@@ -13,7 +13,7 @@ A data frame with 20,551 rows and 8 variables:
   \item{TQIPeffect}{The coefficient for this diagnosis in the TQP regression model.}
   \item{TQIPint}{The intercept in the TQP regression model.}
   \item{NISeffect}{The coefficient for this diagnosis in the NIS regression model.}
-  \item{NISint}{The intercept in the TQP regression model.}
+  \item{NISint}{The intercept in the NIS regression model.}
   \item{version}{The most recent date when this dataset was revised.  Encoded vyymmdd.}
   ...
 }
