@@ -1,5 +1,5 @@
 ---
-title: "Response"
+title: "Response to Dr. Piatt"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{response}
@@ -7,6 +7,111 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-Empty for now
-Watch this space
+*Version 260808*
 
+
+### **Background**
+
+In January 2026, only a few weeks after the release of ICDPIC-R2, Dr. Joseph Piatt submitted an evaluation to the journal *Injury Epidemiology*, which has since been published (2026; 13:35).   While independent studies of ICDPIC are very welcome, this one appears to have been written rather hastily and reaches conclusions that must be challenged.
+
+It is probable that anyone reading this review of the published article will already be familiar with the background of injury severity scoring and the many abbreviations that have developed in this area.  If not, the reader is referred to the “Implementation Details” vignette provided with ICDPIC-R2 and the references cited there.
+
+Although ICDPIC-R2 offers several methods of injury categorization and scoring, Dr. Piatt’s study focuses exclusively on discrepancies between the AIS recorded by trauma registrars in the American College of Surgeons TQP PUF (Reg-AIS) and the AIS estimated by ICDPIC-R2 from the observed association of ICD-10-CM codes on mortality (ICD-AIS).  
+
+The ACS requires that trauma centers use special injury diagnosis codes produced by the Association for the Advancement of Automotive Medicine (AAAM), which include an AIS derived from expert opinion.  There are arguments for and against deriving AIS using a subjective process compared to the objective methods of ICDPIC-R2.  For a given case, however, the assignment of specific AAAM codes, like the assignment of specific ICD-10-CM codes, is certainly subject to bias and error.  Nevertheless, Dr. Piatt’s study starts with the premise that Reg-AIS is the “ground truth”.
+
+It is a classic logical fallacy to assume that A is true and conclude that B is false and A is true because B≠A.  This review will show that Dr. Piatt’s study has many more specific weaknesses. 
+
+
+### **Basic Methodologic Issues**
+
+The study used data from the 2022 ACS TQP PUF, and so can be replicated by anyone with access to those data through the ACS.  An R script is provided at **https://github.com/clark-david/icdpicr2/tree/main/response/**, which was used for this review and may assist others who wish to verify it.
+
+The article acknowledges that 18% of the originally identified cases do not have a recorded outcome, and these are excluded from the analysis.  The article does not have any evaluation about whether these excluded cases are different from those with complete data and does not discuss whether this might bias the results.
+
+After excluding cases with missing outcome data, the study restricts the sample to “files with an AIS head score of 1 or greater”.  These are apparently identified as the 337,148 cases with an AAAM diagnosis code starting with “1”.  However, the study fails to recognize that the body regions for calculation of ISS are different from the regions used by AAAM.  As a result, 29% of the Reg-AIS codes in the sample actually belong to ISS Region 6 (general) rather than ISS Region 1 (head and neck).  Since ICD-AIS codes use the standard ISS regions, the subsequent analyses involving “head” AIS are not really comparing the same thing.
+
+Disregarding the above, the study then sought to determine the maximum “head” AIS severity for each case.  The article mentions that the AAAM designation AIS=9 means “missing”.  However, the study treats a patient with one or more injuries coded between AIS=1 and AIS=6 but at least one with AIS=9 as having AISmax=9.  This will lead to other problems in the subsequent analyses.   
+
+The article furthermore records that 3.0% of the patients in the sample were classified as “Asian”, while 2.4% were classified as “race unknown” and 9.7% were classified as “other race”.  It will later focus on the alleged effects of this “Asian” classification, but does not address the obvious potential for different registrars to assign these categories in different ways.  
+
+Despite all the problems described above, it is possible to recreate Dr. Piatt’s Table 1, but there are a couple of apparent transcription errors such that the numbers in Table 1 do not add up to 337,148.  More importantly, the number of AISmax=9 cases is considerably overstated for the reason given above.  In any case, it is clear that Reg-AIS tends to be higher than ICD-AIS.
+
+Some of these issues can be extended to comparisons between the ISS derived by the two sources (Reg-ISS and ICD-ISS) but again the article simply accepts Reg-ISS as “ground truth”.   A Bland-Altman plot of ICD-ISS versus Reg-ISS is depicted as Dr. Piatt’s Figure 1, but a plot is not very useful since many of the 337,148 observations are superimposed.  No Bland-Altman statistics (bias and limits of agreement) are provided.  Similar information is shown in Dr. Piatt’s Table 2, which does establish that Reg-ISS also tends to be higher than ICD-ISS.
+
+The outcomes of interest are specified as “mortality” (including death or discharge to hospice care) and “withdrawal of care”.  However, “withdrawal of care” is not one of the hospital outcomes contained in the PUF variable HOSPDISCHARGEDISPOSITION, but instead is recorded in a separate PUF variable WITHDRAWALLST.   Most patients with a response of “Yes” to the latter variable have a hospital outcome of death or referral to hospice, but some do not. The ambiguity introduced by this variable causes further difficulty in replicating the findings of this study.
+
+Despite all the above, it is possible to confirm that the AUC (area under ROC curve) for the prediction of mortality by ICD-ISS (estimated using a combination of TQP and NIS from year 2020) was 0.748.  The same statistic for Reg-ISS (recorded by registrars with access to the medical record and knowledge of the outcome) was somewhat better at 0.775.  The article does not mention the AUC for the regression predictions provided by ICDPIC-R2, which are 0.780 if based upon the 2020 NIS and 0.825 if based upon the 2020 TQP.
+
+The regression models described in the study do not specify whether or how “withdrawal of care” patients were included.  Squared and cubic transformations of ISS are retained in the models although they have no significant effect (odds ratio = 1.00).  The models include both ISS and AISmax, which further complicates interpretation since “head” AISmax is (at least theoretically) a component of ISS.  It is possible to replicate the ICD-AIS model in Dr. Piatt’s Table 4 exactly, but the others can only be approximated.
+
+After presenting basic logistic regression models for predicting mortality, the article states that “the odds ratios for AIS head scores increased monotonically in the regression on mapped scores as in the regression on actual scores.”  This is true for the model based on ICD-AIS, but **not** true for the model based on Reg-AIS.  Table 4 (on the same page as the words just quoted) shows that the Reg-AIS model had an adjusted odds ratio of 0.80 for AISmax=2, that is, a paradoxically **decreased** mortality compared to the reference category of AISmax=1.  Tabulating mortality by AISmax confirms this anomaly, which persists even after correcting the programming error described above.
+ 
+
+### **Model Discrepancies**
+
+The methodologic issues discussed to this point are raised mostly to demonstrate that this study was not performed with the diligence usually required for publishable epidemiological research, and it is somewhat surprising that these deficiencies were not identified during the peer review process.  
+
+However, the finding most emphasized in the article is that when demographic variables are added to the mortality prediction (Dr. Piatt’s Table 5), the model based upon Reg-AIS estimates a lower adjusted odds ratio for “Asian” patients compared to “White” patients, while the model based upon ICD-AIS does not.  Since Reg-AIS is considered “ground truth”, this difference is taken as evidence that ICDPIC-R2 is “seriously deficient”.  
+
+Of course, there may be other explanations for this discrepancy if it is permissible to reject the assumption that Reg-AIS must be true.  Since the only variables that are different between the models are AIS and ISS (derived from AIS), it is instructive to tabulate the actual mortality for the various categories of AISmax depicted in Dr. Piatt’s Table 1.  
+
+                                                       ICD-AIS 
+|Reg-AIS|0-1|  2  |  3  |  4  |  5  |
+|--|---|---|---|---|---|
+|1|**.019**|.023|.045|.088|.025|
+|2|.008|**.016**|.032|.070|.254|
+|3|.017|.022|**.034**|.059|.273|
+|4|.025|.046|.051|**.115**|.474|
+|5-6|.158|.231|.179|.397|**.597**|
+|9|.020|.030|.115|.320|.726|
+
+If Reg-AIS were the absolute truth, mortality for a given value of Reg-AIS should be similar regardless of ICD-AIS.  In reality, when Reg-AIS > ICD-AIS, it is ICD-AIS that is a more accurate predictor.  
+
+It can also be demonstrated that “Asian” patients are more likely to have Reg-AIS > ICD-AIS. For each category, the following table presents the corresponding likelihood ratio (Probability of being “Asian” if in this category / Probability of being “Asian” if not in this category).
+
+                                                       ICD-AIS
+|Reg-AIS|0-1|   2  |  3  |  4  |  5  |
+|--|---|---|---|---|---|
+|1|0.75|0.71|0.85|0.39|0.36|
+|2|0.92|0.98|0.87|0.77|0.52|
+|3|1.98|0.94|1.20|1.01|0.77|
+|4|3.45|1.16|1.06|0.90|0.34|
+|5-6|5.90|1.14|1.25|1.17|1.07|
+|9|0.18|0.56|0.70|1.00|0.53|
+
+The odds ratio of 0.78 for “Asian” patients in the Reg-AIS mortality model (Dr. Piatt’s Table 5) can thus be explained as an adjustment for the fact that registrars were more likely to assign them a falsely high AISmax.
+
+The article goes on to present linear regression models of LOS (Dr. Piatt’s Table 6), now showing that the “Asian” group has a shorter predicted LOS in the model based upon Reg-ISS, while they have a longer predicted LOS in the model based upon ICD-ISS.  Again, this is considered evidence that the latter “cannot be a reliable basis for hypothesis testing”.
+
+Modeling LOS can be tricky since patients with more serious injuries tend to have a longer LOS, but those with the most serious injuries may die and therefore have a short LOS.  Even if fatal cases are excluded, the distribution of LOS is very skewed and therefore inappropriate for ordinary least squares regression.  The article states that “confidence intervals were bootstrapped” because of the skewed distribution, but this does not resolve the issue of falsely assuming normally distributed errors, which should have been pointed out during peer review.
+
+At any rate, the LOS models in this study suffer from an even more elementary flaw by omitting most of the covariates that had been included in the mortality models.  When these confounding variables are restored, both Reg-AIS and ICD-AIS models show that the “Asian” group is associated with a longer LOS, and the difference between them is much smaller.
+
+
+### **Interpretation**
+
+Having used circular reasoning to conclude that ICDPIC-R2 is “seriously deficient”, the study is remarkably incurious about its most striking result — the supposed “protective effect” of being “Asian”.  It does not formulate any hypotheses about why an “Asian” patient with a serious head injury should have a lower mortality.  It does not cite any previous studies about Asian-American trauma patients, which have actually associated this group with **higher** mortality after injury (see references below).
+
+However, if the assumption of Reg-AIS as “ground truth” is dismissed, the results are more interesting.  Trauma registrars and medical records coders review the patient’s chart separately and specify diagnoses using different coding systems.  It makes sense that they can both identify injuries of different severities but may produce somewhat independent predictions.  Intentional upcoding of ICD diagnoses (to increase reimbursement) has been detected in the past and there are now rules and penalties to deter this practice.  The results shown above suggest that upcoding of AAAM diagnoses may also occur.
+
+In the 2020 U.S. Census, more than 7% of the population identified as Asian-American, and the proportion is much higher in some geographic areas.  The distribution of “Asian”, “other race”, and “race unknown” categories in the TQP PUF leaves a great deal of room for variation in assigning them.  It is not possible to determine exactly how misclassification bias might have combined with AAAM-AIS upcoding in different hospitals to produce the results of this study, but an explanation along these lines seems more likely than blindly accepting Reg-AIS as infallible and asserting some previously unrecognized tolerance of head injury among “Asians”.
+
+The discussion at the end of the article contains numerous misspellings and additional inaccuracies which further suggest that this study could have been more carefully performed:  The Italian trauma registry studied by DiBartolomeo *et al* was **not** coded using ICD-9-CM (the American Clinical Modification).  The ICDMAP program studied by Sears *et al* and Fleischman *et al* was **not** a Stata package.  The article states that ICDPIC-R2 is based on ICD-10-CM codes from TQP so it “cannot be expected to perform better” in hospitals that are not trauma centers, but in fact ICDPIC-R2 also uses data from the NIS (as clearly stated in the program documentation).  Finally, ICDPIC-R2 does not use the Reg-AIS or Reg-ISS recorded in TQP to derive scores, so the assertions that it “purports to match hand-made AIS scores” or is “edited retrospectively to harmonize with the registrar-assigned AIS scores” are completely false.  
+
+In conclusion, there will certainly be limitations to the results obtained with ICDPIC-R2, especially if ICD-AIS is used as a substitute for Reg-AIS.  However, this study by Dr. Piatt has major flaws and its attempt to discredit ICDPIC-R2 should be viewed with skepticism.
+
+### **References**
+
+Arthur M, Hedges JR, Newgard CD, Diggs BS, Mullins RJ.  Racial disparities in mortality among adults hospitalized after injury.  *Med Care* 2008; 46:192-199.
+
+Berry C, Ley EJ, Mirocha J, Salim A.  Race affects mortality after moderate to severe traumatic brain injury.  *J Surg Res* 2010; 163:303-308.
+
+Haines KL, Agarwal S, Jung HS.  Socioeconomics affecting quality outcomes in Asian trauma patients within the United States.  *J Surg Res* 2018; 228:63-67.
+
+Baker MB, Sood H, Binda DD, Dienes E, Nozari A, Brahmbhatt TS, Suchdev K, Daneshmund A.  Collision course: A decade of traumatic brain injury trends and the impact of urban safety initiatives in Eastern Massachusetts.  *J Clin Med* 2025; 14:5825.
+
+
+### **Acknowledgement**
+
+The use of TQP PUF data for this report was approved under a data use agreement with the Committee on Trauma, American College of Surgeons, TQP PUF Version Admission Year 2022, Chicago IL 2022.  The content reproduced from the PUF remains the full and exclusive copyrighted property of the American College of Surgeons.  The American College of Surgeons is not responsible for any claims arising from works based on the original data, text, tables, or figures.
