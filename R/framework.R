@@ -173,13 +173,6 @@ framework <- function(df, dx_pre, severity=FALSE, messages=FALSE) {
     message("Time elapsed ", mindiff, " minutes")
   }
 
-  message("=============================================")
-  message("REMINDER")
-  message("ICDPICR Version 2.0.5 IS BEING TESTED")
-  message("Major bugs and flaws may still exist")
-  message("Please report issues to david.clark@tufts.edu")
-  message("or at github/clark-david/icdpicr2/issues")
-  message("==============================================")
 
   # Return dataframe
   df
