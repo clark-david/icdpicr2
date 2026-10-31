@@ -105,7 +105,7 @@ Reads in user data in the specified format.  Assigns each ICD-10 injury code to 
 * Update documentation
 
 
-### **Updates from 2.1.0 - 2.1.1**
+### **Updates from 2.1.0 - 2.1.2**
 
 * No changes in functionality
 
@@ -161,6 +161,6 @@ Reads in user data in the specified format.  Assigns each ICD-10 injury code to 
 
 * Functions available in “icdpicr2”
 
-* Updates from Version 2.0 to Version 2.1.1
+* Updates from Version 2.0 to Version 2.1.2
 
 * References
